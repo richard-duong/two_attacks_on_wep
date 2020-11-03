@@ -5,11 +5,11 @@
 
 //this defines all the parts of the packet to form the 128 bit char
 struct packet {
-    char IV[24];
+    char IV[3];
     char src[20];
     char dest[20];
-    char msg[32];
-    char crc[32];
+    char msg[4];
+    char crc[4];
 } packet;
 
 
