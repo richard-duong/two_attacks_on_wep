@@ -1,13 +1,15 @@
 CC=gcc
 CFLAGS= -lcrypto
 
-all: packet test
+all: packet tests
 
 packet:
-	$(CC) -o packet.out packet.c $(CFLAGS)
+	$(CC) -o outputs/packet.out packet.c $(CFLAGS)
 
-test:
-	$(CC) -o test.out test.c $(CFLAGS)
+tests: crc32_test
+
+crc32_test:
+	$(CC) -o outputs/crc32_test tests/crc32_test.c $(CFLAGS)
 
 clean:
 	rm *.out
