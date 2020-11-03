@@ -32,10 +32,10 @@ int main(){
     unsigned char buf_rc4_out[80];
     
     //RC4_set_key(RC4_KEY *key, int len, const unsigned char *data)
-    RC4_set_key(&buf_rc4_key, 3, packet.IV);
+    RC4_set_key(&buf_rc4_key, 3, packet.IV); //initalize key using 24 bit IV, 3 bytes in length 
     //RC4(RC4_KEY *key, unsigned long len, const unsigned char *indata,
     //unsigned char *outdata);
-    RC4(&buf_rc4_key, 40, buf_rc4, buf_rc4_out); //encrypt 40 bytes of buf_rc4 and put it in buf_rc4_out     
+    RC4(&buf_rc4_key, 40, buf_rc4, buf_rc4_out); //encrypt 40 bytes of buf_rc4 (currently src + dest) and put it in buf_rc4_out     
     printf("Encryption of IP header: %s\n", buf_rc4_out);
     
     
