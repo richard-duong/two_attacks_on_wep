@@ -9,3 +9,5 @@ packet:
 test:
 	$(CC) -o test.out test.c $(CFLAGS)
 
+clean:
+	rm *.out

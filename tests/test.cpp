@@ -10,7 +10,7 @@ int main(){
 
 
 
-	string str1 = "Hello";
+	char* str1 = "Hello";
 	Crc crc(str1);
 	crc.print();
 

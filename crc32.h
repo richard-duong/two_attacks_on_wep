@@ -3,6 +3,7 @@
 
 #include "stdio.h"
 #include "string.h"
+#include "stdlib.h"
 
 const __uint32_t crc_tbl[] = {
 0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -50,7 +51,7 @@ const __uint32_t crc_tbl[] = {
 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d };
 
 struct Crc32{
-	char msg[32];
+	char* msg;
 	__uint32_t result;
 };
 
@@ -68,9 +69,12 @@ __uint32_t convert(char* msg){
 	return crc32;
 }
 
-void generate(struct Crc32 obj, char* text){
-	strcpy(obj.msg, text);
-	obj.result = convert(obj.msg);
+void generate(struct Crc32* obj, char* text){
+	int size = strlen(obj->msg);
+	obj->msg = (char *) malloc(size);
+	strcpy(obj->msg, text);
+	obj->result = convert(obj->msg);
 }
 
 #endif
+
