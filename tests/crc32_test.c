@@ -1,13 +1,16 @@
-#include "../crc32.h"
 #include "inttypes.h"
+#include "../headers/crc32.h"
 
 int main(){
 
 	char* msg = "hello";
 	int size = strlen(msg);
-	struct Crc32 crc32;
-	generate(&crc32, msg);
+	Crc32 crc;
+	generate_crc(&crc, msg);
 
-	printf("%" PRIu32 "\n", crc32.result);	
+	for(int i = 0; i < 4; ++i){
+		printf("message %d: %d\n", i, msg[i]);
+		printf("crc %d: %d\n", i, crc.result[i]);
+	}
 
 }

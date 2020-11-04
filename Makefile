@@ -1,10 +1,15 @@
 CC=gcc
 CFLAGS= -lcrypto
+HEADER= header/iv.h \
+				header/ip_header.h \
+				header/crc32.h \
+				header/packet.h \
+				header/rc4.h
 
-all: packet tests
+all: program tests
 
-packet:
-	$(CC) -o outputs/packet.out packet.c $(CFLAGS)
+program:
+	$(CC) -o outputs/program.out program.c $(CFLAGS)
 
 tests: crc32_test
 
@@ -12,4 +17,4 @@ crc32_test:
 	$(CC) -o outputs/crc32_test tests/crc32_test.c $(CFLAGS)
 
 clean:
-	rm *.out
+	rm output/*.out
