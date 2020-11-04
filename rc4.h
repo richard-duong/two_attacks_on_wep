@@ -12,17 +12,18 @@ char[] decrypt(char[] x)
     
 }
 
-char[] encrypt(packet packet)
+char[] encrypt(packet pkt)
 {
     RC4_KEY buf_rc4_key; 
     unsigned char buf_rc4[80];
-    strcat(packet.src, buf_rc4); //src
-    strcat(packet.dest, buf_rc4); //src + dest
+    strcat(pkt.src, buf_rc4); //src
+    strcat(pkt.dest, buf_rc4); //src + dest
     unsigned char buf_rc4_out[80];
     char key[11];
     strcat(password,key); //password
-    strcat(packet.IV, key); //password + key
+    strcat(pkt.IV, key); //password + IV
     RC4_set_key(&buf_rc4_key, 11, key);
-    printf("Encryption of IP header: %s\n", buf_rc4_out);
+    RC4(&buf_rc4_key, 8, buf_rc4, buf_rc4_out);
+    //printf("Encryption of IP header: %s\n", buf_rc4_out);
     return buf_rc4_out;
 }
