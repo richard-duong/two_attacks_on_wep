@@ -29,6 +29,7 @@ char[] decrypt(char[] *pkt) //19 bytes
     //decrypt the newpkt excluding the IV
     char decrypt[16];
     RC4(&buf_rc4_key, 16, newpkt, decrypt);
+    return decrpyt[16];
     
     
 }
