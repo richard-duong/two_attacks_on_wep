@@ -1,5 +1,4 @@
-
-outputs/*.out
+outputs/*
 headers/*.swp
 tests/*.swp
 *.swp
