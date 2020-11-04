@@ -12,7 +12,7 @@ char[] decrypt(char[] x)
     
 }
 
-char[] encrypt(packet pkt)
+char[] encrypt(packet &pkt)
 {
     RC4_KEY buf_rc4_key; 
     unsigned char buf_rc4[80];
