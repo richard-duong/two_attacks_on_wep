@@ -7,12 +7,18 @@ int main(){
 
 	packet pkt;
 	populate_packet(&pkt, src, dest, msg);
-	print_raw_packet(&pkt);
-
-	form_packet(&pkt);
+	print_packet(&pkt);
+	construct_packet(&pkt);
 	
 	printf("\nPrint raw packet: \n");
+
+	// print iv
+	for(int i = 0; i < 3; ++i){
+		printf("%d ", pkt.vec.arr[i]);
+	}
+
+	// print raw
 	for(int i = 0; i < 16; ++i){
-		printf("Index %d: %d\n", i, pkt.raw[i]);
+		printf("%d ", pkt.raw[i]);
 	}
 }

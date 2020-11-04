@@ -7,15 +7,15 @@
 
 
 typedef struct InitVector {
-	char vec[3];
+	char arr[3];
 }iv;
 
 
-void populate_iv(iv* vector){
+void populate_iv(iv* vec){
 	srand(time(NULL));
-	int size = sizeof(vector->vec);	
+	int size = sizeof(vec->arr);	
 	for(int i = 0; i < size; ++i){
-		vector->vec[i] = rand() % 256;	
+		vec->arr[i] = rand() % 256;	
 	}	
 }
 

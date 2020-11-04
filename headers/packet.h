@@ -4,79 +4,145 @@
 #include "iv.h"
 #include "ip_header.h"
 #include "crc32.h"
-#include "rc4.h"
+#include "rc5.h"
 
 typedef struct packets {
-	iv vector;
+	iv vec;
 	ip_header header;
 	crc32 crc;
 	char msg[4];
 	char raw[16];
-	char encrypt[19];
+	char encoding[19];
 }packet;
 
 // generates & populates crc
-void populate_crc(packet* ptrpkt){
-	char M[12];			
-	strncpy(M, ptrpkt->header.src, 4);
-	strncpy(M + 4, ptrpkt->header.dest, 4);
-	strncpy(M + 8, ptrpkt->msg, 4);
-	generate_crc(&ptrpkt->crc, M, 12);	
+void populate_crc(packet* pktptr){
+	int src_len = 4;
+	int dest_len = 4;
+	int msg_len = 4;
+	int total_len = src_len + dest_len + msg_len;
+	char* M = malloc(total_len);
+
+	// copies ip header & message to M
+	strncpy(M, pktptr->header.src, src_len);
+	strncpy(M + src_len, pktptr->header.dest, dest_len);
+	strncpy(M + src_len + dest_len, pktptr->msg, msg_len);
+	generate_crc(&pktptr->crc, M, total_len);	
+
+	// deallocates memory
+	free(M);
 }
 
 // HELPER - generates the pre-encrypted 16 byte packet into pkt.raw
-void form_packet(packet* ptrpkt){
-	strncat(ptrpkt->raw, ptrpkt->header.src, 4);
-	strncat(ptrpkt->raw, ptrpkt->header.dest, 4);
-	strncat(ptrpkt->raw, ptrpkt->msg, 4);
-	strncat(ptrpkt->raw, ptrpkt->crc.result, 4);
+void construct_packet(packet* pktptr){
+	int src_len = 4;
+	int dest_len = 4;
+	int msg_len = 4;
+	int crc_len = 4;
+
+	strncpy(pktptr->raw, pktptr->header.src, src_len);
+	strncpy(pktptr->raw + src_len, pktptr->header.dest, dest_len);
+	strncpy(pktptr->raw + src_len + dest_len, pktptr->msg, msg_len);
+	strncpy(pktptr->raw + src_len + dest_len + msg_len, pktptr->crc.result, crc_len);
 }
+
+
+// HELPER - deconstructs raw value and puts values into packet accordingly
+void deconstruct_packet(packet* pktptr){
+	int src_len = 4;
+	int dest_len = 4;
+	int msg_len = 4;
+	int crc_len = 4;
+
+	strncpy(pktptr->header.src, pktptr->raw, src_len);
+	strncpy(pktptr->header.dest, pktptr->raw + src_len, dest_len);
+	strncpy(pktptr->msg, pktptr->raw + src_len + dest_len, msg_len);
+	strncpy(pktptr->crc.result, pktptr->raw + src_len + dest_len + msg_len,  crc_len);
+}
+
 
 // runs rc4 and places result into pkt.encrypt
-void encrypt_packet(packet* ptrpkt){
-	form_packet(ptrpkt);
-	encrypt(ptrpkt, 16);		
+void encode_packet(packet* pktptr){
+	int raw_len = 16;
+	int iv_len = 3;
+
+	construct_packet(pktptr);
+	strncpy(pktptr->encoding, pktptr->vec.arr, iv_len);
+	RC4_IV(pktptr->encoding + iv_len, pktptr->raw, &pktptr->vec, raw_len);			
 }
 
-// automatically sets values into packet accordingly
-void populate_packet(packet* ptrpkt, char* src, char* dest, char* msg){
-	strncpy(ptrpkt->msg, msg, 4);
-	populate_ip(&ptrpkt->header, src, dest);		
-	populate_iv(&ptrpkt->vector);
-	populate_crc(ptrpkt);
-	encrypt_packet(ptrpkt);
+void decode_packet(packet* pktptr){
+	int raw_len = 16;
+	int iv_len = 3;	
+
+	strncpy(pktptr->vec.arr, pktptr->encoding, iv_len);
+	RC4_IV(pktptr->raw, pktptr->encoding + iv_len, &pktptr->vec, raw_len);
+	deconstruct_packet(pktptr);
+
+	// check CRC for validity
+
+}
+
+// automatically translates values into packet accordingly
+void populate_packet(packet* pktptr, char* src, char* dest, char* msg){
+	int msg_len = 4;
+
+	strncpy(pktptr->msg, msg, msg_len);
+	populate_ip(&pktptr->header, src, dest);		
+	populate_iv(&pktptr->vec);
+	populate_crc(pktptr);
+	encode_packet(pktptr);
+}
+
+// decrypts and translates packet down accordingly (Access Point Only)
+// returns -1 if crc is invalid, 1 if valid
+int receive_packet(packet* pktptr, char* buffer){
+	int buffer_len = 19;
+	strncpy(pktptr->encoding, buffer, buffer_len); 
+	decode_packet(pktptr);
+	// verify crc here and return true or false accordingly
+
+	return 1;
 }
 
 // prints raw packet values
-void print_raw_packet(packet* ptrpkt){
+void print_packet(packet* pktptr){
 
-	printf("\nIV:\n");
+	printf("\n\nIV:\n");
 	for(int i = 0; i < 3; ++i){
-		printf("IV index %d: %d\n", i, ptrpkt->vector.vec[i]);
+		printf("%d ", pktptr->vec.arr[i]);
 	}
 
-	printf("\nCRC:\n");
+	printf("\n\nCRC:\n");
 	for(int i = 0; i < 4; ++i){
-		printf("CRC index %d: %d\n", i, ptrpkt->crc.result[i]);
+		printf("%d ", pktptr->crc.result[i]);
 	}
 
-
-	printf("\nsrc IP: ");
+	printf("\n\nsrc IP: ");
 	for(int i = 0; i < 4; ++i){
-		printf("%d ", ptrpkt->header.src[i]);
+		printf("%d ", pktptr->header.src[i]);
 	}
 
-	printf("\ndest IP: ");
+	printf("\n\ndest IP: ");
 	for(int i = 0; i < 4; ++i){
-		printf("%d ", ptrpkt->header.dest[i]);
+		printf("%d ", pktptr->header.dest[i]);
 	}
 
-	printf("\nmessage ascii: ");
+	printf("\n\nmessage ascii: \n");
 	for(int i = 0; i < 4; ++i){
-		printf("%d", ptrpkt->msg[i]);
+		printf("%d ", pktptr->msg[i]);
 	}
 
-	printf("\nmessage cstr: %s\n", ptrpkt->msg);
+	printf("\n\nmessage cstr: \n");
+	for(int i = 0; i < 4; ++i){
+		printf("%c ", pktptr->msg[i]);
+	}
+
+	printf("\n\nencoding: \n");
+	for(int i = 0; i < 19; ++i){
+		printf("%d ", pktptr->encoding[i]);
+	}
+	printf("\n");
 
 }
 
