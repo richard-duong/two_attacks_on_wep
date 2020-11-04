@@ -55,7 +55,7 @@ typedef struct CyclicRedundancyCheck{
   char result[4];
 }crc32;
 
-__uint32_t make_crc(char* msg, int size){
+__uint32_t generate_crc(char* msg, int size){
   __uint32_t crc = 0xFFFFFFFF;
   int index = 0;
 
@@ -68,9 +68,9 @@ __uint32_t make_crc(char* msg, int size){
   return crc;
 }
 
-void generate_crc(crc32* obj, char* msg, int size){
+void store_crc(crc32* obj, char* msg, int size){
   __uint32_t res;
-  res = make_crc(msg, size);
+  res = generate_crc(msg, size);
 
   for(int i = 0; i < 4; ++i){
     obj->result[i] = (res & 0xFF);

@@ -29,7 +29,7 @@ void populate_crc(packet* pktptr){
   strncpy(M, pktptr->header.src, src_len);
   strncpy(M + src_len, pktptr->header.dest, dest_len);
   strncpy(M + src_len + dest_len, pktptr->msg, msg_len);
-  generate_crc(&pktptr->crc, M, total_len);  
+  store_crc(&pktptr->crc, M, total_len);  
 
   // deallocates memory
   free(M);
