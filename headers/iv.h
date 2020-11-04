@@ -4,14 +4,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct IV {
+typedef struct InitVector {
 	char iv[3];
-};
+}IV;
 
-void populate(struct IV& vector){
-	int size = sizeof(vector.iv);	
+
+void populate_iv(IV* vector){
+	int size = sizeof(vector->iv);	
 	for(int i = 0; i < size; ++i){
-		vector.iv[i] = rand() % 256;	
+		vector->iv[i] = rand() % 256;	
 	}	
 }
 

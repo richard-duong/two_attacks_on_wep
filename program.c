@@ -35,9 +35,6 @@ int main(){
     //unsigned char *outdata);
     RC4(&buf_rc4_key, 40, buf_rc4, buf_rc4_out); //encrypt 40 bytes of buf_rc4 (currently src + dest) and put it in buf_rc4_out     
     printf("Encryption of IP header: %s\n", buf_rc4_out);
-    
-    
-    
-    
+      
     return 0;
 }
