@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-//this defines all the parts of the packet to form the 128 bit char
+//this defines all the parts of the packet to form the 19 bytes or 26 bytes bit char
 struct packet {
     char IV[3];
     char src[20];
@@ -11,6 +11,7 @@ struct packet {
     char msg[4];
     char crc[4];
 } packet;
+
 
 int main(){
     
@@ -23,7 +24,6 @@ int main(){
     
     //RC4 ecnryption
     RC4_KEY buf_rc4_key; // how give IP + PACKET as a char data to RC4 ????
-    
     unsigned char buf_rc4[80];
     strcat(packet.src, buf_rc4); //buf_rc4 =  src
     strcat(packet.dest, buf_rc4); // buf_rc4 = src + dest
