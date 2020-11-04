@@ -12,8 +12,6 @@ struct packet {
     char crc[4];
 } packet;
 
-
-
 int main(){
     
     int x = 0;

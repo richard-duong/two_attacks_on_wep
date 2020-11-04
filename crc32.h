@@ -51,7 +51,7 @@ const __uint32_t crc_tbl[] = {
 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d };
 
 struct Crc32{
-	char* msg;
+	char msg[4];
 	__uint32_t result;
 };
 
@@ -70,11 +70,9 @@ __uint32_t convert(char* msg){
 }
 
 void generate(struct Crc32* obj, char* text){
-	int size = strlen(obj->msg);
-	obj->msg = (char *) malloc(size);
-	strcpy(obj->msg, text);
+	memset(obj->msg, '\0', 4*sizeof(char));
+	strncpy(obj->msg, text, 3);
 	obj->result = convert(obj->msg);
 }
 
 #endif
-
