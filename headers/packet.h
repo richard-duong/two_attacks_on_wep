@@ -4,12 +4,15 @@
 #include "iv.h"
 #include "ip_header.h"
 #include "crc32.h"
+#include "rc4.h"
 
 typedef struct packets {
 	iv vector;
 	ip_header header;
 	crc32 crc;
 	char msg[4];
+	char raw[16];
+	char encrypt[19];
 }packet;
 
 // generates & populates crc
@@ -21,17 +24,31 @@ void populate_crc(packet* ptrpkt){
 	generate_crc(&ptrpkt->crc, M, 12);	
 }
 
+// HELPER - generates the pre-encrypted 16 byte packet into pkt.raw
+void form_packet(packet* ptrpkt){
+	strncat(ptrpkt->raw, ptrpkt->header.src, 4);
+	strncat(ptrpkt->raw, ptrpkt->header.dest, 4);
+	strncat(ptrpkt->raw, ptrpkt->msg, 4);
+	strncat(ptrpkt->raw, ptrpkt->crc.result, 4);
+}
+
+// runs rc4 and places result into pkt.encrypt
+void encrypt_packet(packet* ptrpkt){
+	form_packet(ptrpkt);
+	encrypt(ptrpkt, 16);		
+}
+
 // automatically sets values into packet accordingly
 void populate_packet(packet* ptrpkt, char* src, char* dest, char* msg){
 	strncpy(ptrpkt->msg, msg, 4);
 	populate_ip(&ptrpkt->header, src, dest);		
 	populate_iv(&ptrpkt->vector);
 	populate_crc(ptrpkt);
+	encrypt_packet(ptrpkt);
 }
 
-
 // prints raw packet values
-void raw_packet(packet* ptrpkt){
+void print_raw_packet(packet* ptrpkt){
 
 	printf("\nIV:\n");
 	for(int i = 0; i < 3; ++i){

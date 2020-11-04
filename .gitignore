@@ -1,3 +1,5 @@
-a.out
-packet.out
-test.out
+
+outputs/*.out
+headers/*.swp
+tests/*.swp
+*.swp
