@@ -28,7 +28,7 @@ void RC4_IV(char* dest, char* src, iv* vecptr, int size)
 {
   RC4_KEY buf_rc4_key; 
   int pass_len = strlen(password);
-  int iv_len = strlen(vecptr->arr);
+  int iv_len = 3;
   char* key = malloc(pass_len + iv_len);
 
   // concatenates password + iv to key

@@ -80,9 +80,6 @@ void decode_packet(packet* pktptr){
   strncpy(pktptr->vec.arr, pktptr->encoding, iv_len);
   RC4_IV(pktptr->raw, pktptr->encoding + iv_len, &pktptr->vec, raw_len);
   deconstruct_packet(pktptr);
-
-  // check CRC for validity
-
 }
 
 // automatically translates values into packet accordingly
@@ -100,51 +97,63 @@ void populate_packet(packet* pktptr, char* src, char* dest, char* msg){
 // returns -1 if crc is invalid, 1 if valid
 int receive_packet(packet* pktptr, char* buffer){
   int buffer_len = 19;
+  int raw_len = 16;
+  int valid = 0;
   strncpy(pktptr->encoding, buffer, buffer_len); 
   decode_packet(pktptr);
-  // verify crc here and return true or false accordingly
-
-  return 1;
+  valid = generate_crc(pktptr->raw, raw_len);
+  
+  if(valid == 0){
+    return 1;
+  }
+  else{
+    return -1;
+  }
 }
 
 // prints raw packet values
 void print_packet(packet* pktptr){
 
-  printf("\nIV:\n");
+  printf("\nIV: ");
   for(int i = 0; i < 3; ++i){
     printf("%d ", pktptr->vec.arr[i]);
   }
 
-  printf("\n\nCRC:\n");
-  for(int i = 0; i < 4; ++i){
-    printf("%d ", pktptr->crc.result[i]);
-  }
-
-  printf("\n\nsrc IP: \n");
+  printf("\nSRC: ");
   for(int i = 0; i < 4; ++i){
     printf("%d ", pktptr->header.src[i]);
   }
 
-  printf("\n\ndest IP: \n");
+  printf("\nDEST: ");
   for(int i = 0; i < 4; ++i){
     printf("%d ", pktptr->header.dest[i]);
   }
 
-  printf("\n\nmessage ascii: \n");
+  printf("\nMSG (uINT): ");
   for(int i = 0; i < 4; ++i){
     printf("%d ", pktptr->msg[i]);
   }
 
-  printf("\n\nmessage cstr: \n");
+  printf("\nMSG (CHAR): ");
   for(int i = 0; i < 4; ++i){
     printf("%c ", pktptr->msg[i]);
   }
 
-  printf("\n\nencoding: \n");
+  printf("\nCRC: ");
+  for(int i = 0; i < 4; ++i){
+    printf("%d ", pktptr->crc.result[i]);
+  }
+
+  printf("\nRAW: ");
+  for(int i = 0; i < 16; ++i){
+    printf("%d ", pktptr->raw[i]);
+  }
+
+  printf("\nENCODE: ");
   for(int i = 0; i < 19; ++i){
     printf("%d ", pktptr->encoding[i]);
   }
-  printf("\n");
+  printf("\n\n");
 
 }
 

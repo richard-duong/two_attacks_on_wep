@@ -4,11 +4,32 @@
 int main(){
   char src[4] = {1, 2, 3, 4};
   char dest[4] = {8, 8, 8, 8};  
-  char msg[5] = "hate";
+  char msg[5] = "nope";
+  int valid_packet;
 
-  packet pkt;
-  populate_packet(&pkt, src, dest, msg);
-  print_packet(&pkt);
+  packet send_pkt;
+  populate_packet(&send_pkt, src, dest, msg);
+  printf("Original Packet\n=============\n");
+  print_packet(&send_pkt);
+
+
+  packet recv_pkt;
+  valid_packet = receive_packet(&recv_pkt, send_pkt.encoding);
+
+  printf("Received Packet\n===============\n");
+  print_packet(&recv_pkt);
+  printf("\n\n");
+
+  if(valid_packet == 1){
+    printf("Packet passed CRC!\n");
+  }
+
+  else{
+    printf("Packet failed CRC!\n");
+  }
+  
+
+
 
 
 }
