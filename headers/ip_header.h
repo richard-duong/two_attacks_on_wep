@@ -1,6 +1,8 @@
 #ifndef __IP_HEADER_H__
 #define __IP_HEADER_H__
 
+#include "string.h"
+
 typedef struct ip_headers {
 	char src[4];
 	char dest[4];

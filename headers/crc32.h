@@ -53,24 +53,24 @@ const __uint32_t crc_tbl[] = {
 typedef struct CyclicRedundancyCheck{
 	char msg[4];
 	char result[4];
-}Crc32;
+}crc32;
 
 __uint32_t make_crc(char* msg, int size){
-	__uint32_t crc32 = 0xFFFFFFFF;
+	__uint32_t crc = 0xFFFFFFFF;
 	int index = 0;
 
 	for(int i = 0; i < size; ++i){
-		index = (crc32 ^ msg[i]) & 0xFF;
-		crc32 = (crc32 >> 8) ^ crc_tbl[index];
+		index = (crc ^ msg[i]) & 0xFF;
+		crc = (crc >> 8) ^ crc_tbl[index];
 	}
 
-	crc32 = crc32 ^ 0xFFFFFFFF;
-	return crc32;
+	crc = crc ^ 0xFFFFFFFF;
+	return crc;
 }
 
-void generate_crc(Crc32* obj, char* msg){
+void generate_crc(crc32* obj, char* msg, int size){
 	__uint32_t res;
-	res = make_crc(msg, 4);
+	res = make_crc(msg, size);
 
 	for(int i = 0; i < 4; ++i){
 		obj->result[i] = (res & 0xFF);

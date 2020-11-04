@@ -3,16 +3,19 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
+
 
 typedef struct InitVector {
-	char iv[3];
-}IV;
+	char vec[3];
+}iv;
 
 
-void populate_iv(IV* vector){
-	int size = sizeof(vector->iv);	
+void populate_iv(iv* vector){
+	srand(time(NULL));
+	int size = sizeof(vector->vec);	
 	for(int i = 0; i < size; ++i){
-		vector->iv[i] = rand() % 256;	
+		vector->vec[i] = rand() % 256;	
 	}	
 }
 
