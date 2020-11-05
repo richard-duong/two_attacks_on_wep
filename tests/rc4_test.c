@@ -1,5 +1,5 @@
 #include "../headers/packet.h"
-#include "../headers/rc5.h"
+#include "../headers/rc4.h"
 
 int main(){
   char src[4] = {1, 2, 3, 4};
@@ -9,9 +9,9 @@ int main(){
 
   packet send_pkt;
   populate_packet(&send_pkt, src, dest, msg);
+
   printf("Original Packet\n=============\n");
   print_packet(&send_pkt);
-
 
   packet recv_pkt;
   valid_packet = receive_packet(&recv_pkt, send_pkt.encoding);
@@ -20,7 +20,7 @@ int main(){
   print_packet(&recv_pkt);
   printf("\n\n");
 
-  if(valid_packet ^ 0xFFFFFFFF== 0){
+  if(valid_packet == 0){
     printf("Packet passed CRC!\n");
   }
 
@@ -28,8 +28,4 @@ int main(){
     printf("Packet failed CRC!\n");
   }
   
-
-
-
-
 }

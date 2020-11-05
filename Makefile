@@ -4,7 +4,7 @@ HEADERS= 	header/iv.h \
 					header/ip_header.h \
 					header/crc32.h \
 					header/packet.h \
-					header/rc5.h
+					header/rc4.h
 
 all: program tests
 

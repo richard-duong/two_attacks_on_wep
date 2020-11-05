@@ -1,58 +1,46 @@
+#ifndef __RC4_H__
+#define __RC4_H__
+
 #include <openssl/rc4.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include packet.h
+#include "iv.h"
 
-char password[] = "password";
+char* password = "password";
 
-char[] decrypt(char[] *pkt) //19 bytes
+/*
+  RC4_IV
+  =========================================================================
+
+  Objective: 
+  Run RC4 on char* src using the WEP password + IV, and then translating it
+  into char* dest. This can be used for encryption or decryption
+
+  Output: 
+  None
+
+  Results: 
+  char* dest now holds the RC4(src) value
+*/
+
+void RC4_IV(char* dest, char* src, iv* vecptr, int size)
 {
-    //take in char[19], cut off prefix IV, use pass + IV,
-    char IV[3];
-    for (int i = 0; i < 3; i++)
-    {
-        IV[i] = pkt[i];
-    }
+  RC4_KEY buf_rc4_key; 
+  int pass_len = strlen(password);
+  int iv_len = 3;
+  char* key = malloc(pass_len + iv_len);
+
+  // concatenates password + iv to key
+  strncpy(key, password, pass_len);  
+  strncpy(key + pass_len, vecptr->arr, iv_len); 
     
-    char newpkt[16];
-    for (int i = 3; i < 19; i++)
-    {
-        newpkt[i] = pkt[i];
-    }
-    
-    RC4_KEY buf_rc4_key;
-    char key[11];
-    strcat(password,key); //password
-    strcat(IV, key); //password + IV
-    RC4_set_key(&buf_rc4_key, 11, key);
-    //decrypt the newpkt excluding the IV
-    char decrypt[16];
-    RC4(&buf_rc4_key, 16, newpkt, decrypt);
-    return decrpyt[16];
-    
-    
+  // sets key and encrypts pkt->raw to pkt->encrypt
+  RC4_set_key(&buf_rc4_key, pass_len + iv_len, key);
+  RC4(&buf_rc4_key, size, src, dest);
+
+  // deallocate memory allocated for key
+  free(key);
 }
 
-char[] encrypt(packet *pkt)
-{
-    RC4_KEY buf_rc4_key; 
-    unsigned char buf_rc4[80];
-    strcat(pkt.src, buf_rc4); //src
-    strcat(pkt.dest, buf_rc4); //src + dest
-    
-    //NEED TO ADD CRC
-    // will look like strcat(crc,buf_rc4);
-    
-    unsigned char buf_rc4_out[80];
-    char key[11];
-    strcat(password,key); //password
-    strcat(pkt.IV, key); //password + IV
-    
-    
-    RC4_set_key(&buf_rc4_key, 11, key);
-    RC4(&buf_rc4_key, 8, buf_rc4, buf_rc4_out);
-    //printf("Encryption of IP header: %s\n", buf_rc4_out);
-    return buf_rc4_out;
-    
-}
+#endif
