@@ -4,9 +4,7 @@
 #include "iv.h"
 #include "ip_header.h"
 #include "crc32.h"
-#include "rc5.h"
-
-/* Add prototypes here */
+#include "rc4.h"
 
 typedef struct packets {
   iv vec;
@@ -17,99 +15,187 @@ typedef struct packets {
   char encoding[19];
 }packet;
 
-// generates & populates crc
-void populate_crc(packet* pktptr){
-  int src_len = 4;
-  int dest_len = 4;
-  int msg_len = 4;
-  int total_len = src_len + dest_len + msg_len;
-  char* M = malloc(total_len);
+/******* PROTOTYPES *******/
+/**************************/
 
-  // copies ip header & message to M
-  strncpy(M, pktptr->header.src, src_len);
-  strncpy(M + src_len, pktptr->header.dest, dest_len);
-  strncpy(M + src_len + dest_len, pktptr->msg, msg_len);
-  store_crc(&pktptr->crc, M, total_len);  
+void populate_packet(packet* pktptr, char* src, char* dest, char* msg);
+int receive_packet(packet* pktptr, char* buffer);
+void populate_crc(packet* pktptr);
+void construct_packet(packet* pktptr);
+void deconstruct_packet(packet* pktptr);
+void encode_packet(packet* pktptr);
+void decode_packet(packet* pktptr);
+void print_packet(packet* pktptr);
 
-  // deallocates memory
-  free(M);
-}
-
-// HELPER - generates the pre-encrypted 16 byte packet into pkt.raw
-void construct_packet(packet* pktptr){
-  int src_len = 4;
-  int dest_len = 4;
-  int msg_len = 4;
-  int crc_len = 4;
-
-  strncpy(pktptr->raw, pktptr->header.src, src_len);
-  strncpy(pktptr->raw + src_len, pktptr->header.dest, dest_len);
-  strncpy(pktptr->raw + src_len + dest_len, pktptr->msg, msg_len);
-  strncpy(pktptr->raw + src_len + dest_len + msg_len, pktptr->crc.result, crc_len);
-}
+/******* FOR USERS *******/
+/*************************/
 
 
-// HELPER - deconstructs raw value and puts values into packet accordingly
-void deconstruct_packet(packet* pktptr){
-  int src_len = 4;
-  int dest_len = 4;
-  int msg_len = 4;
-  int crc_len = 4;
+/* populate_packet
+ * ===========================================================================
+ * Objective:
+ * Populate a SENDING packet with the ip_header and message
+ * that has a CRC, encrypted, and ready to be sent as a char buffer
+ *
+ * Inputs:  
+ * packet* pktptr : packet to populate
+ * char* src      : source ip address               [4 bytes]
+ * char* dest     : dest ip address                 [4 bytes]
+ * char* msg      : message to put into packet      [4 bytes]
+ *
+ * Outputs:
+ * None
+ *
+ * Result: 
+ * pktptr is populated with ip_header, message, iv, and crc
+ * we store the raw format into pktptr->raw
+ * then we also encode it and store into pktptr->encoding
+ */
 
-  strncpy(pktptr->header.src, pktptr->raw, src_len);
-  strncpy(pktptr->header.dest, pktptr->raw + src_len, dest_len);
-  strncpy(pktptr->msg, pktptr->raw + src_len + dest_len, msg_len);
-  strncpy(pktptr->crc.result, pktptr->raw + src_len + dest_len + msg_len,  crc_len);
-}
-
-
-// runs rc4 and places result into pkt.encrypt
-void encode_packet(packet* pktptr){
-  int raw_len = 16;
-  int iv_len = 3;
-
-  construct_packet(pktptr);
-  strncpy(pktptr->encoding, pktptr->vec.arr, iv_len);
-  RC4_IV(pktptr->encoding + iv_len, pktptr->raw, &pktptr->vec, raw_len);      
-}
-
-void decode_packet(packet* pktptr){
-  int raw_len = 16;
-  int iv_len = 3;  
-
-  strncpy(pktptr->vec.arr, pktptr->encoding, iv_len);
-  RC4_IV(pktptr->raw, pktptr->encoding + iv_len, &pktptr->vec, raw_len);
-  deconstruct_packet(pktptr);
-}
-
-// automatically translates values into packet accordingly
 void populate_packet(packet* pktptr, char* src, char* dest, char* msg){
-  int msg_len = 4;
-
-  strncpy(pktptr->msg, msg, msg_len);
+  strncpy(pktptr->msg, msg, 4);
   populate_ip(&pktptr->header, src, dest);    
   populate_iv(&pktptr->vec);
   populate_crc(pktptr);
   encode_packet(pktptr);
 }
 
-// decrypts and translates packet down accordingly (Access Point Only)
-// returns -1 if crc is invalid, 1 if valid
+
+/* receive_packet
+ * ===================================================================
+ * Objective:
+ * (ACCESS POINT ONLY)
+ * Receive an encrypted packet and decrypt it accordingly.
+ * interpret ip_header, message, and crc
+ * use a crc checksum to see if the packet is still valid
+ *
+ * Inputs: 
+ * packet* pktptr : packet to store decrypted buffer
+ * char* buffer   : buffer received and to be decrypted
+ *
+ * Outputs:
+ * int validity   : returns 0 if valid crc, anything else is invalid
+ *
+ * Result: 
+ * pktptr is populated with ip_header, message, iv, and crc
+ * from the buffer. we also calculate the crc checksum to see
+ * if the packet was modified during transmit.
+ * Returns a 0 if the packet was not modified
+ */
+
+
+
 int receive_packet(packet* pktptr, char* buffer){
-  int buffer_len = 19;
-  int raw_len = 16;
-  int valid = 0;
-  strncpy(pktptr->encoding, buffer, buffer_len); 
-  decode_packet(pktptr);
-  valid = generate_crc(pktptr->raw, raw_len);
-  
-  if(valid == 0){
-    return 1;
-  }
-  else{
-    return -1;
-  }
+  crc32 check;
+
+  strncpy(pktptr->encoding, buffer, 19); 
+  decode_packet(pktptr); 
+  store_crc(&check, pktptr->raw, 12);
+  return crc_check(&pktptr->crc, &check);
 }
+
+/******* HELPER FUNCTIONS *******/
+/********************************/
+
+
+/* populate_crc
+ * ==========================================================================
+ * Objective:
+ * Generates a CRC based on the ip_header + message, and then
+ * inserts that CRC into 
+ * 
+ * Inputs: 
+ * packet* pktptr : packet used in order to populate crc
+ *
+ * Outputs:
+ * None
+ *
+ * Result:
+ * pktptr is used to grab contents of ip_header and message in order
+ * to calculate the CRC. we then store the CRC into pktptr->crc
+ */
+
+void populate_crc(packet* pktptr){
+
+  char* M = malloc(12);
+  strncpy(M, pktptr->header.src, 4);
+  strncpy(M + 4, pktptr->header.dest, 4);
+  strncpy(M + 8, pktptr->msg, 4);
+  store_crc(&pktptr->crc, M, 12);  
+  free(M);
+}
+
+
+/* construct_packet
+ * ========================================================================
+ * Objective:
+ * Stores the values of ip_header + msg + crc into an array that is
+ * ready for encryption
+ *
+ * Inputs:
+ * packet* pktptr : packet to retrieve values and store raw into
+ *
+ * Outputs:
+ * None
+ *
+ * Result:
+ * pktptr->raw is populated with ip_header + msg + crc
+ * pktptr->raw is 16 bytes
+ */
+
+void construct_packet(packet* pktptr){
+  strncpy(pktptr->raw, pktptr->header.src, 4);
+  strncpy(pktptr->raw + 4, pktptr->header.dest, 4);
+  strncpy(pktptr->raw + 8, pktptr->msg, 4);
+  strncpy(pktptr->raw + 12, pktptr->crc.result, 4);
+}
+
+
+
+/* deconstruct_packet
+ * ========================================================================
+ * Objective:
+ * Deconstruct the pktptr->raw into its separate sections such as
+ * ip_header, msg, and crc
+ *
+ * Inputs:
+ * packet* pktptr : packet to grab raw and update with sections
+ *
+ * Outputs:
+ * None
+ *
+ * Result:
+ * pktptr->src, pktptr->dest, pktptr->msg, pktptr->crc should be updated
+ * to match the pktptr->raw accordingly
+ */
+
+void deconstruct_packet(packet* pktptr){
+  strncpy(pktptr->header.src, pktptr->raw, 4);
+  strncpy(pktptr->header.dest, pktptr->raw + 4, 4);
+  strncpy(pktptr->msg, pktptr->raw + 8, 4);
+  strncpy(pktptr->crc.result, pktptr->raw + 12,  4);
+}
+
+/* encode_packet
+ * =========================================================================
+ * Objective:
+ * Encrypts packet
+ *
+ */
+
+void encode_packet(packet* pktptr){
+  construct_packet(pktptr);
+  strncpy(pktptr->encoding, pktptr->vec.arr, 3);
+  RC4_IV(pktptr->encoding + 3, pktptr->raw, &pktptr->vec, 16);      
+}
+
+// 
+void decode_packet(packet* pktptr){
+  strncpy(pktptr->vec.arr, pktptr->encoding, 3);
+  RC4_IV(pktptr->raw, pktptr->encoding + 3, &pktptr->vec, 16);
+  deconstruct_packet(pktptr);
+}
+
 
 // prints raw packet values
 void print_packet(packet* pktptr){

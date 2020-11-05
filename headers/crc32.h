@@ -78,6 +78,17 @@ void store_crc(crc32* obj, char* msg, int size){
   }
 }
 
+int crc_check(crc32* client_crc, crc32* server_crc){
+  for(int i = 0; i < 4; ++i){
 
+    printf("Index: %d\n", i);
+    printf("Server: %d\n", server_crc->result[i]);
+    printf("Client: %d\n\n", client_crc->result[i]);
+    if(client_crc->result[i] != server_crc->result[i]){
+      //
+    }
+  }
+  return 0;
+}
 
 #endif
