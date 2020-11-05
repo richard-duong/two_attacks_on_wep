@@ -10,14 +10,20 @@ A coding implementation demonstrating the vulnerabilities of CRC-32 and WEP prot
 ### Design Choices
 | struct packet<br>
 | ----  struct iv<br>
-| -------- char arr[3]<br>
 | ---- struct ip_header<br>
-| -------- char src[4]<br>
-| -------- char dest[4]<br>
 | ---- char[4] msg<br>
 | ---- struct crc<br>
-| -------- char [4] msg<br>
-| -------- char [4] result<br>
+
+| struct iv<br>
+| ---- char arr[3]<br>
+
+| struct ip_header<br>
+| ---- char src[4]<br>
+| ---- char dest[4]<br>
+
+| struct crc<br>
+| ---- char [4] msg<br>
+| ---- char [4] result<br>
 
 ### Client / Server Architecture
 We ran into an issue with our design with determining how we would forward packets to ip addresses.
