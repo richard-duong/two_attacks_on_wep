@@ -2,7 +2,7 @@
 Written by Jacob Tan and Richard Duong
 
 -----------------------------------------------------------------------------------------------------------------------
-<br>
+
 ### Objective:
 A coding implementation demonstrating the vulnerabilities of CRC-32 and WEP protocol 
 <br><br>
