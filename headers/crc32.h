@@ -51,11 +51,11 @@ const __uint32_t crc_tbl[] = {
 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d };
 
 typedef struct CyclicRedundancyCheck{
-  char msg[4];
-  char result[4];
+  unsigned char msg[4];
+  unsigned char result[4];
 }crc32;
 
-__uint32_t generate_crc(char* msg, int size){
+__uint32_t generate_crc(unsigned char* msg, int size){
   __uint32_t crc = 0xFFFFFFFF;
   int index = 0;
 
@@ -68,7 +68,7 @@ __uint32_t generate_crc(char* msg, int size){
   return crc;
 }
 
-void store_crc(crc32* obj, char* msg, int size){
+void store_crc(crc32* obj, unsigned char* msg, int size){
   __uint32_t res;
   res = generate_crc(msg, size);
 
@@ -80,12 +80,8 @@ void store_crc(crc32* obj, char* msg, int size){
 
 int crc_check(crc32* client_crc, crc32* server_crc){
   for(int i = 0; i < 4; ++i){
-
-    printf("Index: %d\n", i);
-    printf("Server: %d\n", server_crc->result[i]);
-    printf("Client: %d\n\n", client_crc->result[i]);
     if(client_crc->result[i] != server_crc->result[i]){
-      //
+      return -1;
     }
   }
   return 0;

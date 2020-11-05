@@ -6,27 +6,27 @@
 #include "crc32.h"
 #include "rc4.h"
 
-char alice[4] = {1,1,1,1}; //port 50000
-char carolwep[4] = {2,2,2,2}; //port 49500
-char ap[4] = {3,3,3,3}; //
-char bob[4] = {4,4,4,4}; //
-char carol[4] = {5,5,5,5}; //
+unsigned char alice[4] = {1,1,1,1};      // port 50000
+unsigned char carolwep[4] = {2,2,2,2};   // port 49500
+unsigned char ap[4] = {3,3,3,3};         // port 49000
+unsigned char bob[4] = {4,4,4,4};        // port 48500
+unsigned char carol[4] = {5,5,5,5};      // port 48000
 
 
 typedef struct packets {
   iv vec;
   ip_header header;
   crc32 crc;
-  char msg[4];
-  char raw[16];
-  char encoding[19];
+  unsigned char msg[4];
+  unsigned char raw[16];
+  unsigned char encoding[19];
 }packet;
 
 /******* PROTOTYPES *******/
 /**************************/
 
-void populate_packet(packet* pktptr, char* src, char* dest, char* msg);
-int receive_packet(packet* pktptr, char* buffer);
+void populate_packet(packet* pktptr, unsigned char* src, unsigned char* dest, unsigned char* msg);
+int receive_packet(packet* pktptr, unsigned char* buffer);
 void populate_crc(packet* pktptr);
 void construct_packet(packet* pktptr);
 void deconstruct_packet(packet* pktptr);
@@ -42,13 +42,13 @@ void print_packet(packet* pktptr);
  * ===========================================================================
  * Objective:
  * Populate a SENDING packet with the ip_header and message
- * that has a CRC, encrypted, and ready to be sent as a char buffer
+ * that has a CRC, encrypted, and ready to be sent as a unsigned char buffer
  *
  * Inputs:  
  * packet* pktptr : packet to populate
- * char* src      : source ip address               [4 bytes]
- * char* dest     : dest ip address                 [4 bytes]
- * char* msg      : message to put into packet      [4 bytes]
+ * unsigned char* src      : source ip address               [4 bytes]
+ * unsigned char* dest     : dest ip address                 [4 bytes]
+ * unsigned char* msg      : message to put into packet      [4 bytes]
  *
  * Outputs:
  * None
@@ -59,7 +59,7 @@ void print_packet(packet* pktptr);
  * then we also encode it and store into pktptr->encoding
  */
 
-void populate_packet(packet* pktptr, char* src, char* dest, char* msg){
+void populate_packet(packet* pktptr, unsigned char* src, unsigned char* dest, unsigned char* msg){
   strncpy(pktptr->msg, msg, 4);
   populate_ip(&pktptr->header, src, dest);    
   populate_iv(&pktptr->vec);
@@ -78,7 +78,7 @@ void populate_packet(packet* pktptr, char* src, char* dest, char* msg){
  *
  * Inputs: 
  * packet* pktptr : packet to store decrypted buffer
- * char* buffer   : buffer received and to be decrypted
+ * unsigned char* buffer   : buffer received and to be decrypted
  *
  * Outputs:
  * int validity   : returns 0 if valid crc, anything else is invalid
@@ -92,7 +92,7 @@ void populate_packet(packet* pktptr, char* src, char* dest, char* msg){
 
 
 
-int receive_packet(packet* pktptr, char* buffer){
+int receive_packet(packet* pktptr, unsigned char* buffer){
   crc32 check;
 
   strncpy(pktptr->encoding, buffer, 19); 
@@ -124,7 +124,7 @@ int receive_packet(packet* pktptr, char* buffer){
 
 void populate_crc(packet* pktptr){
 
-  char* M = malloc(12);
+  unsigned char* M = malloc(12);
   strncpy(M, pktptr->header.src, 4);
   strncpy(M + 4, pktptr->header.dest, 4);
   strncpy(M + 8, pktptr->msg, 4);
@@ -183,10 +183,22 @@ void deconstruct_packet(packet* pktptr){
   strncpy(pktptr->crc.result, pktptr->raw + 12,  4);
 }
 
+
+
 /* encode_packet
  * =========================================================================
  * Objective:
- * Encrypts packet
+ * Encrypts packet using RC4 over the raw buffer (ip_header + msg + crc)
+ * Places that encryption into the encoding buffer
+ *
+ * Inputs:
+ * packet* pktptr : to produce and retrieve raw buffer and place encryption
+ *
+ * Outputs:
+ * None
+ *
+ * Results:
+ * Will generate the encryption and store into pktptr->encoding
  *
  */
 
@@ -196,7 +208,23 @@ void encode_packet(packet* pktptr){
   RC4_IV(pktptr->encoding + 3, pktptr->raw, &pktptr->vec, 16);      
 }
 
-// 
+/* decode_packet
+ * ==========================================================================
+ * Objective:
+ * Decrypts the encrypted message and generates a raw message that will be
+ * used in order to identify the different parts of the packet
+ *
+ * Inputs:
+ * packet* pktptr : packet to decrypt encryption, and store parts back into
+ *
+ * Outputs:
+ * None
+ *
+ * Result:
+ * pktptr->encoding is decrypted and stored into pktptr->raw, identifies
+ * parts from pktptr->raw and places them correctly into pktptr
+ */
+
 void decode_packet(packet* pktptr){
   strncpy(pktptr->vec.arr, pktptr->encoding, 3);
   RC4_IV(pktptr->raw, pktptr->encoding + 3, &pktptr->vec, 16);
@@ -204,27 +232,42 @@ void decode_packet(packet* pktptr){
 }
 
 
-// prints raw packet values
+
+/* print_packet
+ * ========================================================================
+ * Objective:
+ * Display parts of packet
+ *
+ * Inputs:
+ * packet* pktptr : packet to grab information from
+ *
+ * Outputs:
+ * None
+ *
+ * Result:
+ * Print hexadecimal values of the contents of the packet
+ */
+
 void print_packet(packet* pktptr){
 
   printf("\nIV: ");
   for(int i = 0; i < 3; ++i){
-    printf("%d ", pktptr->vec.arr[i]);
+    printf("%X ", pktptr->vec.arr[i]);
   }
 
   printf("\nSRC: ");
   for(int i = 0; i < 4; ++i){
-    printf("%d ", pktptr->header.src[i]);
+    printf("%X ", pktptr->header.src[i]);
   }
 
   printf("\nDEST: ");
   for(int i = 0; i < 4; ++i){
-    printf("%d ", pktptr->header.dest[i]);
+    printf("%X ", pktptr->header.dest[i]);
   }
 
-  printf("\nMSG (uINT): ");
+  printf("\nMSG: ");
   for(int i = 0; i < 4; ++i){
-    printf("%d ", pktptr->msg[i]);
+    printf("%X ", pktptr->msg[i]);
   }
 
   printf("\nMSG (CHAR): ");
@@ -234,19 +277,19 @@ void print_packet(packet* pktptr){
 
   printf("\nCRC: ");
   for(int i = 0; i < 4; ++i){
-    printf("%d ", pktptr->crc.result[i]);
+    printf("%x ", pktptr->crc.result[i]);
   }
 
   printf("\nRAW: ");
   for(int i = 0; i < 16; ++i){
-    printf("%d ", pktptr->raw[i]);
+    printf("%X ", pktptr->raw[i]);
   }
 
-  printf("\nENCODE: ");
+  printf("\nENCODING: ");
   for(int i = 0; i < 19; ++i){
-    printf("%d ", pktptr->encoding[i]);
+    printf("%X ", pktptr->encoding[i]);
   }
-  printf("\n\n");
+  printf("\n");
 
 }
 

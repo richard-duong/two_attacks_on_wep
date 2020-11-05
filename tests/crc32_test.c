@@ -3,7 +3,7 @@
 
 int main(){
 
-  char* msg = "hello";
+  unsigned char* msg = "hello";
   int size = strlen(msg);
   crc32 crc;
   store_crc(&crc, msg, size);

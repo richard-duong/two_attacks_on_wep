@@ -7,29 +7,29 @@
 #include <string.h>
 #include "iv.h"
 
-char* password = "password";
+unsigned char* password = "password";
 
 /*
   RC4_IV
   =========================================================================
 
   Objective: 
-  Run RC4 on char* src using the WEP password + IV, and then translating it
-  into char* dest. This can be used for encryption or decryption
+  Run RC4 on unsigned char* src using the WEP password + IV, and then translating it
+  into unsigned char* dest. This can be used for encryption or decryption
 
   Output: 
   None
 
   Results: 
-  char* dest now holds the RC4(src) value
+  unsigned char* dest now holds the RC4(src) value
 */
 
-void RC4_IV(char* dest, char* src, iv* vecptr, int size)
+void RC4_IV(unsigned char* dest, unsigned char* src, iv* vecptr, int size)
 {
   RC4_KEY buf_rc4_key; 
   int pass_len = strlen(password);
   int iv_len = 3;
-  char* key = malloc(pass_len + iv_len);
+  unsigned char* key = malloc(pass_len + iv_len);
 
   // concatenates password + iv to key
   strncpy(key, password, pass_len);  
