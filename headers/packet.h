@@ -4,19 +4,13 @@
 #include "iv.h"
 #include "ip_header.h"
 #include "crc32.h"
-<<<<<<< HEAD
 #include "rc4.h"
-=======
-#include "rc5.h"
 
 char alice[4] = {1,1,1,1}; //port 50000
 char carolwep[4] = {2,2,2,2}; //port 49500
 char ap[4] = {3,3,3,3}; //
 char bob[4] = {4,4,4,4}; //
 char carol[4] = {5,5,5,5}; //
-
-/* Add prototypes here */
->>>>>>> f90d545be3534c4efa0e076b87185cf1b858852e
 
 typedef struct packets {
   iv vec;
