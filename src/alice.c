@@ -34,14 +34,16 @@ int main(int argc, char const *argv[])
     }
     
     packet pkt;
-    char src[4] = {0, 0, 0, 0};
-    char dest[4] = {0, 0, 0, 0}; //change to carol wep
+    char src[4] = {1, 1, 1, 1};
+    char dest[4] = {4, 4, 4, 4}; // always goes to Bob
     char msg[5] = {0, 0, 0, 0}; 
+    populate_packet(*pkt, src,dest,msg);
     
+    strncpy(buffer,pkt.encoding,19);
+    send(sock , buffer , 1024 , 0 ); 
     
-    send(sock , hello , strlen(hello) , 0 ); 
-    valread = read( sock , buffer, 1024); 
-    printf("%s\n", buffer); 
+    //valread = read( sock , buffer, 1024); 
+    //printf("%s\n", buffer); 
 
     return 0; 
 }

@@ -56,7 +56,7 @@ int main(){
     
     packet pkt;
     char src[4] = {0, 0, 0, 0};
-    char dest[4] = {0, 0, 0, 0}; //change to Carol 
+    char dest[4] = {0, 0, 0, 0};
     char msg[5] = {0, 0, 0, 0};
     populate_packet(*pkt, src, dest, msg );
     
@@ -64,7 +64,7 @@ int main(){
     {
         buffer[i+3] = pkt.raw[i] ^ buffer[i+3];
     }
-    
+    //does setting pkt.raw affect other data fields? i.e) will it change char msg[], src[], dest[]
     
     
     

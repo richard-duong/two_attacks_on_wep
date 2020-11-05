@@ -13,7 +13,6 @@ char bob[4] = {4,4,4,4}; //
 char carol[4] = {5,5,5,5}; //
 
 /* Add prototypes here */
-
 typedef struct packets {
   iv vec;
   ip_header header;
