@@ -20,7 +20,7 @@ int main(){
   print_packet(&recv_pkt);
   printf("\n\n");
 
-  if(valid_packet == 1){
+  if(valid_packet ^ 0xFFFFFFFF== 0){
     printf("Packet passed CRC!\n");
   }
 
