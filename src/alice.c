@@ -1,49 +1,86 @@
-#include <stdio.h> 
-#include <sys/socket.h> 
-#include <arpa/inet.h> 
-#include <unistd.h> 
-#include <string.h> 
-#include packet.h
+// Standard Libraries
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-int main(int argc, char const *argv[]) 
-{ 
-    int alice = 0, valread; 
-    struct sockaddr_in serv_addr; 
+// External Libraries
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+
+// Custom Libraries
+#include "../headers/packet.h"
+#include "../headers/err.h"
+
+const unsigned char messages[20][100] = 
+{
+  "001", "002", "003", "004", "005",
+  "006", "007", "008", "009", "010",
+  "011", "012", "013", "014", "015",
+  "016", "017", "018", "019", "020" 
+};
+
+
+
+/* alice.c
+ * ==========================================================================  
+ * Objective:
+ * Emulate a client process Alice that generates a packet and sends
+ * it on to the Access Point. In this case CarolWEP intercepts the packet
+ * so in this emulation we are sending it straight to CarolWEP
+ *
+ * Actions:
+ * 1) Generate packet
+ * 2) Connection to CarolWEP 
+ * 3) Send to CarolWEP
+ */
+
+int main(){
+
+  // packet initialization
+  packet pkt;
+
+
+  // buffer initialization
+  char sendBuffer[1024];
+
+  // status initializations
+  int out_socket = -1;
+  int out_conn_status = -1;
+  int out_send_status = -1;
+  int out_close_status = -1;
+
+  // construct sockaddr storing carolwep info
+  struct sockaddr_in carolwep_address;
+  carolwep_address.sin_family = AF_INET;
+  carolwep_address.sin_port = htons(CAROLWEP_PORT);
+  carolwep_address.sin_addr.s_addr = INADDR_ANY;
+
+  for(int i = 0; i < 20; ++i){
     
-    char buffer[1024] = {0}; 
-    if ((alice = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-    { 
-        printf("\n Socket creation error \n"); 
-        return -1; 
-    } 
+    // clear buffers to send new string
+    memset(sendBuffer, 0, sizeof(sendBuffer));
+    populate_packet(&pkt, ALICE_IP, BOB_IP, messages[i]);  
+    strncpy(sendBuffer, pkt.encoding,19);
+    printf("SEQ %d: Sending packet: %s\n", i, messages[i]);
 
-    serv_addr.sin_family = AF_INET; 
-    serv_addr.sin_port = htons(50000); 
+    // create the socket
+    out_socket = socket(AF_INET, SOCK_STREAM, 0); 
+    exit_on_fail("ALICE", "out_socket", out_socket);
 
-    // Convert IPv4 and IPv6 addresses from text to binary form 
-    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) 
-    { 
-        printf("\nInvalid address/ Address not supported \n"); 
-        return -1; 
-    } 
+    // connect to the server
+    out_conn_status = connect(out_socket, (struct sockaddr*) &carolwep_address, sizeof(carolwep_address)); 
+    exit_on_fail("ALICE", "out_conn_status", out_conn_status); 
 
-    if (connect(alice, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
-    { 
-        printf("\nConnection Failed \n"); 
-        return -1; 
-    }
-    
-    packet pkt;
-    char src[4] = {1, 1, 1, 1};
-    char dest[4] = {4, 4, 4, 4}; // always goes to Bob
-    char msg[5] = {0, 0, 0, 0}; 
-    populate_packet(*pkt, src,dest,msg);
-    
-    strncpy(buffer,pkt.encoding,19);
-    send(sock , buffer , 1024 , 0 ); 
-    
-    //valread = read( sock , buffer, 1024); 
-    //printf("%s\n", buffer); 
+    // send the packet
+    out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
+    exit_on_fail("ALICE", "out_send_status", out_send_status); 
 
-    return 0; 
+    // close the socket
+    out_close_status = close(out_socket);
+    exit_on_fail("ALICE", "out_close_status", out_close_status);
+
+    usleep(500);
+  }
 }
