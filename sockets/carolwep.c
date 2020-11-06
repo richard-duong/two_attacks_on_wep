@@ -13,7 +13,8 @@
 int main(){
 
   // buffer initializations
-  packet pkt;
+  packet read_pkt;
+  packet send_pkt;
   char readBuffer[1024];
   char sendBuffer[1024];
   memset(readBuffer, 0, sizeof(readBuffer));
@@ -33,6 +34,8 @@ int main(){
   int out_conn_status = -1;
   int out_send_status = -1;
   int out_close_status = -1;
+
+  int crc_status = -1;
  
 
   // socket address info for carolwep (to receive) 
@@ -70,31 +73,37 @@ int main(){
 
   while(1){
    
-    // accept the incoming connection ***** Check later recv fails 
+    // accept the incoming connection 
     in_socket = accept(listen_socket, NULL, NULL);
 
-    // reads buffer coming from Alice ***** if not reading, add while loop
+    // reads buffer coming from Alice
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
+    printf("\nReceived packet from Alice: %s", readBuffer);
    
 
-    /* KEEP NOTE FOR MODIFICATION HERE
-     *
-     *
-     *
-     *
-     */
+    // Decrypt the packet
+    crc_status = receive_packet(&read_pkt, readBuffer);  
+    if(crc_status != 0){
+      printf("Error: Packet sent to CarolWEP and received from Alice was modified!\n"); 
+    }
+    else{
+      printf("Success: Packet sent to CarolWEP was received successfully!\n");
+    }
 
 
-    printf("\nReceived packet: %s", readBuffer);
+    // Prepare the packet with adjusted destination
+    populate_packet(&send_pkt, read_pkt.src, carol_ip, read_pkt.msg);
+    strncpy(sendBuffer, read_pkt.encoding, 19);
 
-    // CONNECT to AP
+
+    // CONNECT CarolWEP to AP
     out_conn_status = connect(out_socket, (struct sockaddr*) &ap_address, sizeof(ap_address));
 
     if(out_conn_status < 0){
       printf("\nError: Failed to connect to AP from CarolWEP\n");
     }
 
-
+    
     // send the packet
     out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
     
