@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "../headers/packet.h"
+
 // non persistent
 int main(){
 
@@ -28,7 +30,7 @@ int main(){
   // socket address info for carol (to receive) 
   struct sockaddr_in my_address;
   my_address.sin_family = AF_INET;
-  my_address.sin_port = htons(48000);
+  my_address.sin_port = htons(48500);
   my_address.sin_addr.s_addr = INADDR_ANY;
 
   // create sockets for listening and sending
@@ -49,8 +51,9 @@ int main(){
   if(listen_status == -1){
     printf("\nError: Failed to listen for packets\n");
   }
-
-
+  
+  packet pkt;
+  int crc_status = -1;
  
   while(1){
    
@@ -61,7 +64,23 @@ int main(){
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
 
     printf("\nReceived packet: %s", readBuffer);
-
+    
+    crc_status = receive_packet(&pkt, readBuffer);
+    if (crc_status != 0){
+      printf("Error: Packet recieved from AP did not pass checksum.")
+    }
+    else
+    {
+      printf("Success: Packet recieved from AP passed checksum.")
+    }
+    
+    printf("Message: ");
+    
+    for(int i = 0; i < 4; i++)
+    {
+      printf("%c,", pkt.msg[i]);
+    }
+    
     close(in_socket);
 
     sleep(2); 

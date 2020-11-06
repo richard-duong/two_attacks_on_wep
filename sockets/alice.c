@@ -7,12 +7,13 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
+#include "../headers/packet.h"
 
 int main(){
 
   // buffer initialization
-  char sendBuffer[1024] = "Alice says hello";
-  memset(sendBuffer + strlen(sendBuffer), 0, 1024 - strlen(sendBuffer));
+  char sendBuffer[1024];
+  memset(sendBuffer, 0,strlen(sendBuffer));
 
   // status initializations
   int out_socket = -1;
@@ -43,7 +44,15 @@ int main(){
     printf("\n Error: Failed to connect to CarolWEP from Alice\n");
     exit(1);
   }
-
+  
+  //declare the packet
+  packet pkt;
+  char src[4] = {1, 1, 1, 1};
+  char dest[4] = {4, 4, 4, 4}; // always goes to Bob
+  char msg[5] = {0, 0, 0, 0}; 
+  populate_packet(&pkt,src,dest,msg);
+    
+  strncpy(sendBuffer,pkt.encoding,19);
 
   // send the packet
   out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
