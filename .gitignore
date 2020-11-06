@@ -2,3 +2,6 @@ outputs/*
 headers/*.swp
 tests/*.swp
 *.swp
+
+server.c
+client.c

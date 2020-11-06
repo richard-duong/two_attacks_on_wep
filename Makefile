@@ -6,7 +6,7 @@ HEADERS= 	header/iv.h \
 					header/packet.h \
 					header/rc4.h
 
-all: program tests
+all: tests
 
 program:
 	$(CC) -o outputs/program.out program.c $(CFLAGS)

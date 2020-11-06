@@ -26,6 +26,7 @@ int main(){
   unsigned char a_src[4] = {1, 1, 1, 1};            // alice's ip
   unsigned char a_dest[4] = {2, 2, 2, 2};           // bob's ip
   populate_packet(&a_pkt, a_src, a_dest, a_msg);
+  printf("\n\nThis is Alice's Packet\n");
   print_packet(&a_pkt);
 
 
@@ -42,13 +43,15 @@ int main(){
   }
 
   int valid_packet = receive_packet(&a_pkt, a_pkt.encoding);
+
+  printf("\n\nThis is Alice's packet after being modified by Carol (Expect 3333 for DEST)\n");
   print_packet(&a_pkt);
 
   if(valid_packet == 0){
-    printf("It's good!\n");
+    printf("\n\nCRC Checksum: PASSED\n");
   }
   else{
-    printf("It was edited :c\n");
+    printf("\n\nCRC Checksum: FAILED\n");
   }
 
 
