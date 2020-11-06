@@ -75,7 +75,8 @@ int main(){
     printf("\nSuccess: Successfully listening to packets\n");
   }
  
-
+  packet pkt;
+  int crc_status = -1;
 
   while(1){
    
@@ -92,15 +93,25 @@ int main(){
      *
      *
      */
+     
+    crc_status = receive_packet(&pkt, sendBuffer);
+    if (crc_status != 0){
+      printf("Error: Packet recieved from AP did not pass checksum.")
+    }
+    else
+    {
+      printf("Success: Packet recieved from AP passed checksum.")
+    }
 
     printf("\nReceived packet: %s", readBuffer);
 
     // Connect to the correct remote server
-    if(readBuffer[0] == 0){
+    if(strncmp(carol,pkt.dest, 4) == 0){
       out_conn_status = connect(out_socket, (struct sockaddr*) &carol_address, sizeof(ap_address));
     }
 
-    else{
+    else if (strncmp(bob,pkt.dest,4) == 0)
+    {
       out_conn_status = connect(out_socket, (struct sockaddr*) &bob_address, sizeof(ap_address));
     }
 
