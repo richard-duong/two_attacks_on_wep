@@ -7,10 +7,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "../headers/packet.h"
+
 // non persistent
 int main(){
 
   // buffer initializations
+   
   char readBuffer[1024];
   memset(readBuffer, 0, sizeof(readBuffer));
 

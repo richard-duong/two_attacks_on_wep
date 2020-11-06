@@ -6,11 +6,11 @@
 #include "crc32.h"
 #include "rc4.h"
 
-unsigned char alice[4] = {1,1,1,1};      // port 50000
-unsigned char carolwep[4] = {2,2,2,2};   // port 49500
-unsigned char ap[4] = {3,3,3,3};         // port 49000
-unsigned char bob[4] = {4,4,4,4};        // port 48500
-unsigned char carol[4] = {5,5,5,5};      // port 48000
+unsigned char alice[4] =     {169, 235, 16 , 75 };       // port 50000
+unsigned char carolwep[4] =  {100, 100, 100, 100};       // port 49500
+unsigned char ap[4] =        {255, 255, 255, 255};       // port 49000
+unsigned char bob[4] =       {141, 212, 113, 199};       // port 48500
+unsigned char carol[4] =     {128, 2,   42,  95 };       // port 48000
 
 
 typedef struct packets {

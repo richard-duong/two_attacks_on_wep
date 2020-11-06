@@ -7,12 +7,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-// non persistent
+#include "../headers/packet.h"
+
+
 int main(){
 
   // buffer initializations
+  packet pkt;
   char readBuffer[1024];
-  char sendBuffer[1024] = "CarolWEP says hello";
+  char sendBuffer[1024];
   memset(readBuffer, 0, sizeof(readBuffer));
   memset(sendBuffer, 0, sizeof(sendBuffer));
 
@@ -63,8 +66,8 @@ int main(){
     printf("\nError: Failed to listen for packets\n");
   }
 
-
  
+
   while(1){
    
     // accept the incoming connection ***** Check later recv fails 
@@ -72,7 +75,7 @@ int main(){
 
     // reads buffer coming from Alice ***** if not reading, add while loop
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
-
+   
 
     /* KEEP NOTE FOR MODIFICATION HERE
      *
@@ -80,6 +83,7 @@ int main(){
      *
      *
      */
+
 
     printf("\nReceived packet: %s", readBuffer);
 
