@@ -14,7 +14,7 @@ int main(){
 
   // buffer initializations
   char readBuffer[1024];
-  char sendBuffer[1024] = "CarolWEP says hello";
+  char sendBuffer[1024];
   memset(readBuffer, 0, sizeof(readBuffer));
   memset(sendBuffer, 0, sizeof(sendBuffer));
 
@@ -96,26 +96,26 @@ int main(){
      *
      */
     
-    crc_status = receive_packet(&pkt, sendBuffer);
-    printf("sendBuffer: %s", sendBuffer);
+    crc_status = receive_packet(&pkt, readBuffer);
+    printf("\nsendBuffer: %s\n", readBuffer);
     if (crc_status != 0){
-      printf("Error: Packet recieved from carolWEP did not pass checksum.");
+      printf("\nError: Packet recieved from carolWEP did not pass checksum.\n");
     }
     else
     {
-      printf("Success: Packet recieved from carolWEP passed checksum.");
+      printf("\nSuccess: Packet recieved from carolWEP passed checksum.\n");
     }
 
-    printf("\nReceived packet: %s", readBuffer);
+    printf("\nReceived packet: %s\n", readBuffer);
 
     // Connect to the correct remote server
-    if(strncmp(carol,pkt.header.dest, 4) == 0){
+    if(strncmp(carol_ip,pkt.header.dest, 4) == 0){
       out_conn_status = connect(out_socket, (struct sockaddr*) &carol_address, sizeof(carol_address));
     }
 
-    else if (strncmp(bob,pkt.header.dest,4) == 0)
+    else if (strncmp(bob_ip,pkt.header.dest,4) == 0)
     {
-      out_conn_status = connect(out_socket, (struct sockaddr*) &bob_address, sizeof(carol_address));
+      out_conn_status = connect(out_socket, (struct sockaddr*) &bob_address, sizeof(bob_address));
     }
 
     if(out_conn_status < 0){

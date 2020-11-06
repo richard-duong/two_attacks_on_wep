@@ -47,10 +47,8 @@ int main(){
   
   //declare the packet
   packet pkt;
-  char src[4] = {1, 1, 1, 1};
-  char dest[4] = {4, 4, 4, 4}; // always goes to Bob
   char msg[5] = {0, 0, 0, 0}; 
-  populate_packet(&pkt,src,dest,msg);
+  populate_packet(&pkt,alice_ip,bob_ip,msg);
     
   strncpy(sendBuffer,pkt.encoding,19);
 
