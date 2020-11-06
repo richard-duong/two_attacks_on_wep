@@ -58,7 +58,7 @@ int main(){
     char src[4] = {0, 0, 0, 0};
     char dest[4] = {0, 0, 0, 0};
     char msg[5] = {0, 0, 0, 0};
-    populate_packet(*pkt, src, dest, msg );
+    populate_packet(&pkt, src, dest, msg );
     
     for(int i = 0; i < 16; i++)
     {

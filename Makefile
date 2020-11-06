@@ -11,7 +11,7 @@ all: program tests
 program:
 	$(CC) -o outputs/program.out program.c $(CFLAGS)
 
-tests: crc32_test packet_test rc4_test
+tests: crc32_test packet_test rc4_test edit_test
 
 crc32_test:
 	$(CC) -o outputs/crc32_test.out tests/crc32_test.c $(CFLAGS)
@@ -21,6 +21,9 @@ packet_test:
 
 rc4_test:
 	$(CC) -o outputs/rc4_test.out tests/rc4_test.c $(CFLAGS)
+
+edit_test:
+	$(CC) -o outputs/edit_test.out tests/edit_test.c $(CFLAGS)
 
 clean:
 	rm outputs/*
