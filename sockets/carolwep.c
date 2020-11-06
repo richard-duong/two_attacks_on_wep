@@ -70,7 +70,7 @@ int main(){
   }
 
  
-
+  int modify = 0;
   while(1){
    
     // accept the incoming connection 
@@ -89,12 +89,19 @@ int main(){
     else{
       printf("Success: Packet sent to CarolWEP was received successfully!\n");
     }
-
-
+    
+    // PERFORM EVERY OTHER PACKET. modify variable will oscillate
+    if(modify)
+    {
     // Prepare the packet with adjusted destination
-    populate_packet(&send_pkt, read_pkt.src, carol_ip, read_pkt.msg);
+    populate_packet(&send_pkt, read_pkt.header.src, carol, read_pkt.msg);
     strncpy(sendBuffer, read_pkt.encoding, 19);
-
+    }
+    else
+    {
+      populate_packet(&send_pkt, read_pkt.header.src, read_pkt.header.dest, read_pkt.msg);
+      strncpy(sendBuffer, read_pkt.encoding, 19);
+    }
 
     // CONNECT CarolWEP to AP
     out_conn_status = connect(out_socket, (struct sockaddr*) &ap_address, sizeof(ap_address));
@@ -103,7 +110,7 @@ int main(){
       printf("\nError: Failed to connect to AP from CarolWEP\n");
     }
 
-    
+    printf("sendBuffer: %s", sendBuffer);
     // send the packet
     out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
     
@@ -113,7 +120,9 @@ int main(){
 
     close(out_socket);
     close(in_socket);
-
+    
+    modify = 1 - modify;
+    
     sleep(2); 
   }
 

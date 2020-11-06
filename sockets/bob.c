@@ -67,11 +67,11 @@ int main(){
     
     crc_status = receive_packet(&pkt, readBuffer);
     if (crc_status != 0){
-      printf("Error: Packet recieved from AP did not pass checksum.")
+      printf("Error: Packet recieved from AP did not pass checksum.");
     }
     else
     {
-      printf("Success: Packet recieved from AP passed checksum.")
+      printf("Success: Packet recieved from AP passed checksum.");
     }
     
     printf("Message: ");

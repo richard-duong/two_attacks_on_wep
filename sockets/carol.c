@@ -30,7 +30,7 @@ int main(){
   // socket address info for carol (to receive) 
   struct sockaddr_in my_address;
   my_address.sin_family = AF_INET;
-  my_address.sin_port = htons(48500);
+  my_address.sin_port = htons(48000);
   my_address.sin_addr.s_addr = INADDR_ANY;
 
   // create sockets for listening and sending
@@ -67,11 +67,11 @@ int main(){
     
     crc_status = receive_packet(&pkt, readBuffer);
     if (crc_status != 0){
-      printf("Error: Packet recieved from AP did not pass checksum.")
+      printf("Error: Packet recieved from AP did not pass checksum.");
     }
     else
     {
-      printf("Success: Packet recieved from AP passed checksum.")
+      printf("Success: Packet recieved from AP passed checksum.");
     }
     
     printf("Message: ");
