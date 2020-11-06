@@ -78,16 +78,16 @@ int main(){
 
     // reads buffer coming from Alice
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
-    printf("\nReceived packet from Alice: %s", readBuffer);
+    printf("\nReceived packet from Alice: %s\n", readBuffer);
    
 
     // Decrypt the packet
     crc_status = receive_packet(&read_pkt, readBuffer);  
     if(crc_status != 0){
-      printf("Error: Packet sent to CarolWEP and received from Alice was modified!\n"); 
+      printf("\nError: Packet sent to CarolWEP and received from Alice was modified!\n"); 
     }
     else{
-      printf("Success: Packet sent to CarolWEP was received successfully!\n");
+      printf("\nSuccess: Packet sent to CarolWEP was received successfully!\n");
     }
     
     // PERFORM EVERY OTHER PACKET. modify variable will oscillate
@@ -110,7 +110,7 @@ int main(){
       printf("\nError: Failed to connect to AP from CarolWEP\n");
     }
 
-    printf("sendBuffer: %s", sendBuffer);
+    printf("\nsendBuffer: %s\n", sendBuffer);
     // send the packet
     out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
     
