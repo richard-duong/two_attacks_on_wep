@@ -51,14 +51,13 @@ int main(){
 
   // create sockets for listening and sending
   listen_socket = socket(AF_INET, SOCK_STREAM, 0);
-  out_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 
   // bind listen_socket to carolWEP server
   listen_bind_status = bind(listen_socket, (struct sockaddr*) &my_address, sizeof(my_address));
   
   if(listen_bind_status < 0){
-    printf("\n Error: Failed to bind listening socket to CarolWEP server\n");
+    printf("\nError: Failed to bind listening socket to CarolWEP server\n");
   }
 
 
@@ -68,7 +67,6 @@ int main(){
   if(listen_status == -1){
     printf("\nError: Failed to listen for packets\n");
   }
-
  
   int modify = 0;
   while(1){
@@ -78,7 +76,6 @@ int main(){
 
     // reads buffer coming from Alice
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
-    printf("\nReceived packet from Alice: %s\n", readBuffer);
    
 
     // Decrypt the packet
@@ -88,20 +85,33 @@ int main(){
     }
     else{
       printf("\nSuccess: Packet sent to CarolWEP was received successfully!\n");
+      print_packet(&read_pkt);
     }
     
     // PERFORM EVERY OTHER PACKET. modify variable will oscillate
-    if(modify)
+    // Make sure to edit this to modify the destination
+    if(modify == 1)
     {
-    // Prepare the packet with adjusted destination
-    populate_packet(&send_pkt, read_pkt.header.src, carol, read_pkt.msg);
-    strncpy(sendBuffer, read_pkt.encoding, 19);
+      // Prepare the packet with adjusted destination
+      printf("Enters Carol\n");
+      populate_packet(&send_pkt, read_pkt.header.src, carol_ip, read_pkt.msg);
+      strncpy(sendBuffer, send_pkt.encoding, 19);
     }
     else
     {
+      printf("Enters Bob\n");
       populate_packet(&send_pkt, read_pkt.header.src, read_pkt.header.dest, read_pkt.msg);
-      strncpy(sendBuffer, read_pkt.encoding, 19);
+      strncpy(sendBuffer, send_pkt.encoding, 19);
     }
+
+
+
+    printf("\nThis is the package once it is sent: \n");
+    print_packet(&send_pkt);
+
+
+    // Create OUT socket
+    out_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     // CONNECT CarolWEP to AP
     out_conn_status = connect(out_socket, (struct sockaddr*) &ap_address, sizeof(ap_address));
@@ -110,20 +120,17 @@ int main(){
       printf("\nError: Failed to connect to AP from CarolWEP\n");
     }
 
-    printf("\nsendBuffer: %s\n", sendBuffer);
+
     // send the packet
     out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
     
     if(out_send_status < 0){
-      printf("\n Error: Failed to send packet to CarolWEP from Alice\n");
+      printf("\nError: Failed to send packet to CarolWEP from Alice\n");
     }
 
+    close(in_socket); 
     close(out_socket);
-    close(in_socket);
-    
-    modify = 1 - modify;
-    
+    modify = 1 - modify; 
     sleep(2); 
   }
-
 }

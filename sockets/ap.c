@@ -51,9 +51,8 @@ int main(){
   carol_address.sin_addr.s_addr = INADDR_ANY;
 
 
-  // create sockets for listening and sending
+  // create sockets for listening
   listen_socket = socket(AF_INET, SOCK_STREAM, 0);
-  out_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 
   // bind listen_socket to local AP server
@@ -89,24 +88,32 @@ int main(){
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
 
 
-    /* KEEP NOTE FOR DECRYPTION HERE
-     *
-     *
-     *
-     *
-     */
     
     crc_status = receive_packet(&pkt, readBuffer);
-    printf("\nsendBuffer: %s\n", readBuffer);
+
     if (crc_status != 0){
       printf("\nError: Packet recieved from carolWEP did not pass checksum.\n");
     }
     else
     {
       printf("\nSuccess: Packet recieved from carolWEP passed checksum.\n");
+      print_packet(&pkt);
     }
 
-    printf("\nReceived packet: %s\n", readBuffer);
+    // copies onto sendBuffer
+    strncpy(sendBuffer, pkt.encoding, 19);
+
+
+    printf("\n\n");
+    for(int i = 0; i < 4; ++i){
+      printf("Carol at address %d: %X   |||   ", i, carol_ip[i]);
+      printf("Bob at address %d: %X   |||   ", i, bob_ip[i]);
+      printf("Packet at address %d: %X\n", i, pkt.header.dest[i]);
+    }
+    printf("\n\n");
+
+
+    out_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     // Connect to the correct remote server
     if(strncmp(carol_ip,pkt.header.dest, 4) == 0){
@@ -128,7 +135,7 @@ int main(){
     out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
     
     if(out_send_status < 0){
-      printf("\n Error: Failed to send packet to CarolWEP from Alice\n");
+      printf("\nError: Failed to send packet to CarolWEP from Alice\n");
     }
 
     close(out_socket);

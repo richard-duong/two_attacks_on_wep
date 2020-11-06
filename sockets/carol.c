@@ -57,9 +57,12 @@ int main(){
  
   while(1){
    
+    printf("Waiting...\n");
+
     // accept the incoming connection ***** Check later recv fails 
     in_socket = accept(listen_socket, NULL, NULL);
 
+    printf("Accepted...\n");
     // reads buffer coming from Alice ***** if not reading, add while loop
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
 

@@ -32,7 +32,7 @@ int main(){
   out_socket = socket(AF_INET, SOCK_STREAM, 0); 
 
   if(out_socket < 0){
-     printf("\n Error: Failed to create socket for Alice\n");
+     printf("\nError: Failed to create socket for Alice\n");
      exit(1);
   }
 
@@ -41,25 +41,25 @@ int main(){
   out_conn_status = connect(out_socket, (struct sockaddr*) &carolwep_address, sizeof(carolwep_address)); 
 
   if(out_conn_status < 0){
-    printf("\n Error: Failed to connect to CarolWEP from Alice\n");
+    printf("\nError: Failed to connect to CarolWEP from Alice\n");
     exit(1);
   }
   
   //declare the packet
   packet pkt;
-  char msg[5] = {0, 0, 0, 0}; 
-  populate_packet(&pkt,alice_ip,bob_ip,msg);
-    
+  char msg[5] = "Sack"; 
+  populate_packet(&pkt,alice_ip,bob_ip,msg);  
   strncpy(sendBuffer,pkt.encoding,19);
 
   // send the packet
   out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
-  
+ 
   if(out_send_status < 0){
-    printf("\n Error: Failed to send packet to CarolWEP from Alice\n");
+    printf("\nError: Failed to send packet to CarolWEP from Alice\n");
   }
   else{
-    printf("\n Alice sends \"%s\" successfully\n", sendBuffer);
+    printf("\nSuccess: Alice sends packet successfully\n");
+    print_packet(&pkt);
   }
  
 
@@ -67,6 +67,6 @@ int main(){
   out_close_status = close(out_socket);
 
   if(out_close_status < 0){
-    printf("\n Error: Failed to close sending socket from CarolWEP\n");
+    printf("\nError: Failed to close sending socket from CarolWEP\n");
   }
 }
