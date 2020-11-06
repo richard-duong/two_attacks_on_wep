@@ -5,28 +5,12 @@ Written by Jacob Tan and Richard Duong
 -----------------------------------------------------------------------------------------------------------------------
 
 ### Objective:
-Demonstrate the vulnerabilities of CRC-32 and WEP protocol by designing a system 
-<br><br>
-
-### Struct Design Choices
-struct packet<br>
- |- struct iv<br>
- |- struct ip_header<br>
- |- struct crc32<br>
- |- char[4] msg<br>
- |- char[16] raw<br>
- |- char[19] encryption<br>
-
-struct iv<br>
- |- char arr[3]<br>
-
-struct ip_header<br>
- |- char src[4]<br>
- |- char dest[4]<br>
-
-struct crc<br>
- |- char [4] msg<br>
- |- char [4] result<br>
+Demonstrate the vulnerabilities of CRC-32 and WEP protocol with the use of 2 different attacks:<br>
+1. **The packet-redirect attack** which takes advantage of CRC32's linearity property to modify the destination of the ip header,
+and tricks the Access Point into decrypting the packet before sending it off to the attacker.<br>
+2. **The "chop chop" attack** which also takes advantage of CRC32's linearity property and as long as the Access Point
+returns an acknowledgement for whether the message was accepted or not, one could recover the plaintext by guessing the
+plaintext byte-by-byte.
  
 ### Port Mapping
 Alice IP:           169.235.16.75<br>
