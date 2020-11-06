@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "../headers/packet.h"
+
 // non persistent
 int main(){
 
@@ -93,30 +95,31 @@ int main(){
      *
      *
      */
-     
+    
     crc_status = receive_packet(&pkt, sendBuffer);
+    printf("sendBuffer: %s", sendBuffer);
     if (crc_status != 0){
-      printf("Error: Packet recieved from AP did not pass checksum.")
+      printf("Error: Packet recieved from carolWEP did not pass checksum.");
     }
     else
     {
-      printf("Success: Packet recieved from AP passed checksum.")
+      printf("Success: Packet recieved from carolWEP passed checksum.");
     }
 
     printf("\nReceived packet: %s", readBuffer);
 
     // Connect to the correct remote server
-    if(strncmp(carol,pkt.dest, 4) == 0){
-      out_conn_status = connect(out_socket, (struct sockaddr*) &carol_address, sizeof(ap_address));
+    if(strncmp(carol,pkt.header.dest, 4) == 0){
+      out_conn_status = connect(out_socket, (struct sockaddr*) &carol_address, sizeof(carol_address));
     }
 
-    else if (strncmp(bob,pkt.dest,4) == 0)
+    else if (strncmp(bob,pkt.header.dest,4) == 0)
     {
-      out_conn_status = connect(out_socket, (struct sockaddr*) &bob_address, sizeof(ap_address));
+      out_conn_status = connect(out_socket, (struct sockaddr*) &bob_address, sizeof(carol_address));
     }
 
     if(out_conn_status < 0){
-      printf("\nError: Failed to connect to AP from CarolWEP\n");
+      printf("\nError: Failed to connect to bob or carol from CarolWEP\n");
     }
 
 

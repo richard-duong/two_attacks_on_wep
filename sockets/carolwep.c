@@ -94,12 +94,12 @@ int main(){
     if(modify)
     {
     // Prepare the packet with adjusted destination
-    populate_packet(&send_pkt, read_pkt.src, carol, read_pkt.msg);
+    populate_packet(&send_pkt, read_pkt.header.src, carol, read_pkt.msg);
     strncpy(sendBuffer, read_pkt.encoding, 19);
     }
     else
     {
-      populate_packet(&send_pkt, read_pkt.src, read_pkt.dest, read_pkt.msg);
+      populate_packet(&send_pkt, read_pkt.header.src, read_pkt.header.dest, read_pkt.msg);
       strncpy(sendBuffer, read_pkt.encoding, 19);
     }
 
@@ -110,7 +110,7 @@ int main(){
       printf("\nError: Failed to connect to AP from CarolWEP\n");
     }
 
-    
+    printf("sendBuffer: %s", sendBuffer);
     // send the packet
     out_send_status = send(out_socket, sendBuffer, sizeof(sendBuffer), 0);
     
