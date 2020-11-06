@@ -99,7 +99,23 @@ int receive_packet(packet* pktptr, unsigned char* buffer){
   return crc_check(&pktptr->crc, &check);
 }
 
-
+/* hack_dest_of_packet
+ * =========================================================================
+ * Objective:
+ * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 
 void hack_dest_of_packet(packet* pktptr, char* old_dest, char* new_dest){
   packet my_pkt;
