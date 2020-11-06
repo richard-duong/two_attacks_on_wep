@@ -27,7 +27,7 @@ typedef struct packets {
   crc32 crc;
   unsigned char msg[4];
   unsigned char raw[16];
-  unsigned char encoding[19];
+  unsigned char encryption[19];
 }packet;
 
 
@@ -68,7 +68,7 @@ void print_packet(packet* pktptr);
  * Result: 
  * pktptr is populated with ip_header, message, iv, and crc
  * we store the raw format into pktptr->raw
- * then we also encode it and store into pktptr->encoding
+ * then we also encode it and store into pktptr->encryption
  */
 
 void populate_packet(packet* pktptr, const unsigned char* src, const unsigned char* dest, const unsigned char* msg){
@@ -106,7 +106,7 @@ void populate_packet(packet* pktptr, const unsigned char* src, const unsigned ch
 
 int receive_packet(packet* pktptr, const unsigned char* buffer){
   crc32 check;
-  strncpy(pktptr->encoding, buffer, 19); 
+  strncpy(pktptr->encryption, buffer, 19); 
   decode_packet(pktptr); 
   store_crc(&check, pktptr->raw, 12);
   return crc_check(&pktptr->crc, &check);
@@ -241,7 +241,7 @@ void deconstruct_packet(packet* pktptr){
  * =========================================================================
  * Objective:
  * Encrypts packet using RC4 over the raw buffer (ip_header + msg + crc)
- * Places that encryption into the encoding buffer
+ * Places that encryption into the encryption buffer
  *
  * Inputs:
  * packet* pktptr : to produce and retrieve raw buffer and place encryption
@@ -250,14 +250,14 @@ void deconstruct_packet(packet* pktptr){
  * None
  *
  * Results:
- * Will generate the encryption and store into pktptr->encoding
+ * Will generate the encryption and store into pktptr->encryption
  *
  */
 
 void encode_packet(packet* pktptr){
   construct_packet(pktptr);
-  strncpy(pktptr->encoding, pktptr->vec.arr, 3);
-  RC4_IV(pktptr->encoding + 3, pktptr->raw, &pktptr->vec, 16);      
+  strncpy(pktptr->encryption, pktptr->vec.arr, 3);
+  RC4_IV(pktptr->encryption + 3, pktptr->raw, &pktptr->vec, 16);      
 }
 
 
@@ -275,13 +275,13 @@ void encode_packet(packet* pktptr){
  * None
  *
  * Result:
- * pktptr->encoding is decrypted and stored into pktptr->raw, identifies
+ * pktptr->encryption is decrypted and stored into pktptr->raw, identifies
  * parts from pktptr->raw and places them correctly into pktptr
  */
 
 void decode_packet(packet* pktptr){
-  strncpy(pktptr->vec.arr, pktptr->encoding, 3);
-  RC4_IV(pktptr->raw, pktptr->encoding + 3, &pktptr->vec, 16);
+  strncpy(pktptr->vec.arr, pktptr->encryption, 3);
+  RC4_IV(pktptr->raw, pktptr->encryption + 3, &pktptr->vec, 16);
   deconstruct_packet(pktptr);
 }
 
@@ -339,9 +339,9 @@ void print_packet(packet* pktptr){
     printf("%X ", pktptr->raw[i]);
   }
 
-  printf("\nENCODING: ");
+  printf("\nencryption: ");
   for(int i = 0; i < 19; ++i){
-    printf("%X ", pktptr->encoding[i]);
+    printf("%X ", pktptr->encryption[i]);
   }
   printf("\n");
 

@@ -62,7 +62,7 @@ int main(){
     // clear buffers to send new string
     memset(sendBuffer, 0, sizeof(sendBuffer));
     populate_packet(&pkt, ALICE_IP, BOB_IP, messages[i]);  
-    strncpy(sendBuffer, pkt.encoding,19);
+    strncpy(sendBuffer, pkt.encryption ,19);
     printf("SEQ %d: Sending packet: %s\n", i, messages[i]);
 
     // create the socket

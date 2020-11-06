@@ -14,7 +14,7 @@ int main(){
   print_packet(&send_pkt);
 
   packet recv_pkt;
-  valid_packet = receive_packet(&recv_pkt, send_pkt.encoding);
+  valid_packet = receive_packet(&recv_pkt, send_pkt.encryption);
 
   printf("\n\nReceived Packet\n===============\n");
   print_packet(&recv_pkt);
