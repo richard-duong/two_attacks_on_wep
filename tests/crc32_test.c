@@ -1,6 +1,12 @@
 #include "inttypes.h"
 #include "../headers/crc32.h"
 
+/*
+ *
+ *
+ *
+ */
+
 int main(){
 
   unsigned char* msg = "hello";

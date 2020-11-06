@@ -7,32 +7,36 @@
 #include <string.h>
 #include "iv.h"
 
-unsigned char* password = "password";
+const unsigned char* WEP_PASSWORD = "password";
 
 /*
-  RC4_IV
-  =========================================================================
-
-  Objective: 
-  Run RC4 on unsigned char* src using the WEP password + IV, and then translating it
-  into unsigned char* dest. This can be used for encryption or decryption
-
-  Output: 
-  None
-
-  Results: 
-  unsigned char* dest now holds the RC4(src) value
+ * RC4_IV
+ * =========================================================================
+ * Objective: 
+ * Run RC4 on unsigned char* src using the WEP_PASSWORD + IV, and then translating it
+ * into unsigned char* dest. This can be used for encryption or decryption
+ *
+ * Inputs:
+ * unsigned char* dest        : the dest buffer         [16 bytes]
+ * const unsigned char* src   : raw text to encrypt     [16 bytes]
+ * const iv* vecptr           : predetermined rand()    [3 bytes]
+ *
+ * Output: 
+ * None
+ *
+ * Results: 
+ * dest will now hold the encrypted value of src
 */
 
-void RC4_IV(unsigned char* dest, unsigned char* src, iv* vecptr, int size)
+void RC4_IV(unsigned char* dest, unsigned char* src, const iv* vecptr, int size)
 {
   RC4_KEY buf_rc4_key; 
-  int pass_len = strlen(password);
+  int pass_len = strlen(WEP_PASSWORD);
   int iv_len = 3;
   unsigned char* key = malloc(pass_len + iv_len);
 
-  // concatenates password + iv to key
-  strncpy(key, password, pass_len);  
+  // concatenates WEP_PASSWORD + iv to key
+  strncpy(key, WEP_PASSWORD, pass_len);  
   strncpy(key + pass_len, vecptr->arr, iv_len); 
     
   // sets key and encrypts pkt->raw to pkt->encrypt

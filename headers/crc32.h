@@ -55,7 +55,24 @@ typedef struct CyclicRedundancyCheck{
   unsigned char result[4];
 }crc32;
 
-__uint32_t generate_crc(unsigned char* msg, int size){
+
+/* generate_crc
+ * ===========================================================================
+ * Objective:
+ * Generate a crc value for a message
+ *
+ * Inputs:
+ * const unsigned char* msg     : message to calculate crc on
+ * int size                     : size of message
+ *
+ * Outputs:
+ * __uint32_t crc   : resulting crc value
+ *
+ * Result:
+ * Produces a 32 byte unsigned int holding the crc value of msg
+ */
+
+__uint32_t generate_crc(const unsigned char* msg, int size){
   __uint32_t crc = 0xFFFFFFFF;
   int index = 0;
 
@@ -68,7 +85,27 @@ __uint32_t generate_crc(unsigned char* msg, int size){
   return crc;
 }
 
-void store_crc(crc32* obj, unsigned char* msg, int size){
+
+
+/* store_crc
+ * ==========================================================================
+ * Objective:
+ * Calculate the crc32 value of a provided message, and then
+ * store the crc value into a char array within crc32 object
+ *
+ * Inputs:
+ * crc32* obj                 : object storing crc value into
+ * const unsigned char* msg   : msg to produce crc from 
+ * int size                   : size of message
+ *
+ * Outputs:
+ * None
+ *
+ * Result:
+ * The crc32 obj will hold the resulting bytes of the crc(msg)
+ */
+
+void store_crc(crc32* obj, const unsigned char* msg, int size){
   __uint32_t res;
   res = generate_crc(msg, size);
 
@@ -78,9 +115,27 @@ void store_crc(crc32* obj, unsigned char* msg, int size){
   }
 }
 
-int crc_check(crc32* client_crc, crc32* server_crc){
+
+
+/* crc_check
+ * =========================================================================
+ * Objective:
+ * Verify if 2 crc objects share the same values
+ *
+ * Inputs:
+ * crc32* left  : crc of left parameter
+ * crc32* right : crc of right parameter
+ *
+ * Outputs:
+ * int validity : returns 0 if equal, -1 if not equal
+ *
+ * Result:
+ * Displays whether or not the 2 crcs are equivalent
+ */
+
+int crc_check(crc32* left, crc32* right){
   for(int i = 0; i < 4; ++i){
-    if(client_crc->result[i] != server_crc->result[i]){
+    if(left->result[i] != right->result[i]){
       return -1;
     }
   }

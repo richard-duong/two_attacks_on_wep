@@ -6,12 +6,20 @@
 #include "crc32.h"
 #include "rc4.h"
 
-unsigned char alice_ip[4] =     {169, 235, 16 , 75 };       // port 50000
-unsigned char carolwep_ip[4] =  {100, 100, 100, 100};       // port 49500
-unsigned char ap_ip[4] =        {255, 255, 255, 255};       // port 49000
-unsigned char bob_ip[4] =       {141, 212, 113, 199};       // port 48500
-unsigned char carol_ip[4] =     {128, 2,   42,  95 };       // port 48000
+/******* DEFINITIONS *******/
+/***************************/
 
+const unsigned char ALICE_IP[4]     = {169, 235, 16 , 75 };
+const unsigned char CAROLWEP_IP[4]  = {100, 100, 100, 100};
+const unsigned char AP_IP[4]        = {255, 255, 255, 255};
+const unsigned char BOB_IP[4]       = {141, 212, 113, 199};
+const unsigned char CAROL_IP[4]     = {128, 2,   42,  95 };
+
+const unsigned int ALICE_PORT       = 50000;
+const unsigned int CAROLWEP_PORT    = 49500;
+const unsigned int AP_PORT          = 49000;
+const unsigned int BOB_PORT         = 48500;
+const unsigned int CAROL_PORT       = 48000;
 
 typedef struct packets {
   iv vec;
@@ -22,12 +30,14 @@ typedef struct packets {
   unsigned char encoding[19];
 }packet;
 
+
+
 /******* PROTOTYPES *******/
 /**************************/
 
-void hack_dest_of_packet(packet* pktptr, char* old_dest, char* new_dest);
-void populate_packet(packet* pktptr, unsigned char* src, unsigned char* dest, unsigned char* msg);
-int receive_packet(packet* pktptr, unsigned char* buffer);
+void hack_dest_of_packet(packet* pktptr, const unsigned char* old_dest, const unsigned char* new_dest);
+void populate_packet(packet* pktptr, const unsigned char* src, const unsigned char* dest, const unsigned char* msg);
+int receive_packet(packet* pktptr, const unsigned char* buffer);
 void populate_crc(packet* pktptr);
 void construct_packet(packet* pktptr);
 void deconstruct_packet(packet* pktptr);
@@ -35,8 +45,10 @@ void encode_packet(packet* pktptr);
 void decode_packet(packet* pktptr);
 void print_packet(packet* pktptr);
 
-/******* FOR USERS *******/
-/*************************/
+
+
+/******* USER INTERFACE FUNCTIONS *******/
+/****************************************/
 
 /* populate_packet
  * ===========================================================================
@@ -45,10 +57,10 @@ void print_packet(packet* pktptr);
  * that has a CRC, encrypted, and ready to be sent as a unsigned char buffer
  *
  * Inputs:  
- * packet* pktptr : packet to populate
- * unsigned char* src      : source ip address               [4 bytes]
- * unsigned char* dest     : dest ip address                 [4 bytes]
- * unsigned char* msg      : message to put into packet      [4 bytes]
+ * packet* pktptr                : packet to populate
+ * const unsigned char* src      : source ip address               [4 bytes]
+ * const unsigned char* dest     : dest ip address                 [4 bytes]
+ * const unsigned char* msg      : message to put into packet      [4 bytes]
  *
  * Outputs:
  * None
@@ -59,7 +71,7 @@ void print_packet(packet* pktptr);
  * then we also encode it and store into pktptr->encoding
  */
 
-void populate_packet(packet* pktptr, unsigned char* src, unsigned char* dest, unsigned char* msg){
+void populate_packet(packet* pktptr, const unsigned char* src, const unsigned char* dest, const unsigned char* msg){
   strncpy(pktptr->msg, msg, 4);
   populate_ip(&pktptr->header, src, dest);    
   populate_iv(&pktptr->vec);
@@ -68,56 +80,63 @@ void populate_packet(packet* pktptr, unsigned char* src, unsigned char* dest, un
 }
 
 
+
 /* receive_packet
- * ===================================================================
+ * =========================================================================
  * Objective:
- * (ACCESS POINT ONLY)
  * Receive an encrypted packet and decrypt it accordingly.
  * interpret ip_header, message, and crc
  * use a crc checksum to see if the packet is still valid
  *
  * Inputs: 
- * packet* pktptr : packet to store decrypted buffer
- * unsigned char* buffer   : buffer received and to be decrypted
+ * packet* pktptr                 : packet to store decrypted buffer
+ * const unsigned char* buffer    : buffer to decrypt and fill packet    [4 bytes]
  *
  * Outputs:
- * int validity   : returns 0 if valid crc, anything else is invalid
+ * int validity             : returns 0 if valid crc, else invalid
  *
  * Result: 
  * pktptr is populated with ip_header, message, iv, and crc
  * from the buffer. we also calculate the crc checksum to see
  * if the packet was modified during transmit.
  * Returns a 0 if the packet was not modified
+ *
+ * Note: Only Access Point should be allowed to use this function
  */
 
-int receive_packet(packet* pktptr, unsigned char* buffer){
+int receive_packet(packet* pktptr, const unsigned char* buffer){
   crc32 check;
-
   strncpy(pktptr->encoding, buffer, 19); 
   decode_packet(pktptr); 
   store_crc(&check, pktptr->raw, 12);
   return crc_check(&pktptr->crc, &check);
 }
 
+
+
 /* hack_dest_of_packet
  * =========================================================================
  * Objective:
- * 
+ * Modify the destination of an encrypted packet that has a CRC attached
+ * and allow the packet to still pass the CRC checksum. In order to use
+ * this function, you are expected to know the decrypted bytes in the
+ * destination
  *
+ * Inputs:
+ * unsigned char* buffer              : buffer holding the encryption  [19 bytes]
+ * const unsigned char* old_dest      : unencrypted dest on packet     [4 bytes]
+ * const unsigned char* new_dest      : new dest to assign to packet   [4 bytes]
  *
+ * Outputs:
+ * None
  *
+ * Result:
+ * The buffer's new dest will replace the old dest.
  *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Note: Only CarolWEP should be allowed to use this function
  */
 
-void hack_dest_of_packet(packet* pktptr, char* old_dest, char* new_dest){
+void hack_dest(unsigned char* buffer, const unsigned char* old_dest, const unsigned char* new_dest){
   packet my_pkt;
   packet cancel_pkt;
   unsigned char empty_buffer[4] = {0, 0, 0, 0};
@@ -126,19 +145,16 @@ void hack_dest_of_packet(packet* pktptr, char* old_dest, char* new_dest){
   populate_packet(&cancel_pkt, empty_buffer, old_dest, empty_buffer);
   
   for(int i = 0; i < 16; ++i){
-    pktptr->encoding[i + 3] ^= my_pkt.raw[i];
-    pktptr->encoding[i + 3] ^= cancel_pkt.raw[i];
-
+    buffer[i + 3] ^= my_pkt.raw[i];
+    buffer[i + 3] ^= cancel_pkt.raw[i];
   }
 }
 
 
 
 
-
 /******* HELPER FUNCTIONS *******/
 /********************************/
-
 
 /* populate_crc
  * ==========================================================================
@@ -166,6 +182,7 @@ void populate_crc(packet* pktptr){
   store_crc(&pktptr->crc, M, 12);  
   free(M);
 }
+
 
 
 /* construct_packet
@@ -243,6 +260,8 @@ void encode_packet(packet* pktptr){
   RC4_IV(pktptr->encoding + 3, pktptr->raw, &pktptr->vec, 16);      
 }
 
+
+
 /* decode_packet
  * ==========================================================================
  * Objective:
@@ -290,12 +309,17 @@ void print_packet(packet* pktptr){
     printf("%X ", pktptr->vec.arr[i]);
   }
 
+  printf("\t\tCRC: ");
+  for(int i = 0; i < 4; ++i){
+    printf("%x ", pktptr->crc.result[i]);
+  }
+
   printf("\nSRC: ");
   for(int i = 0; i < 4; ++i){
     printf("%X ", pktptr->header.src[i]);
   }
 
-  printf("\nDEST: ");
+  printf("\t\tDEST: ");
   for(int i = 0; i < 4; ++i){
     printf("%X ", pktptr->header.dest[i]);
   }
@@ -305,14 +329,9 @@ void print_packet(packet* pktptr){
     printf("%X ", pktptr->msg[i]);
   }
 
-  printf("\nMSG (CHAR): ");
+  printf("\t\tMSG (CHAR): ");
   for(int i = 0; i < 4; ++i){
     printf("%c ", pktptr->msg[i]);
-  }
-
-  printf("\nCRC: ");
-  for(int i = 0; i < 4; ++i){
-    printf("%x ", pktptr->crc.result[i]);
   }
 
   printf("\nRAW: ");

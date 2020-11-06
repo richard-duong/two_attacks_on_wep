@@ -6,10 +6,24 @@ HEADERS= 	header/iv.h \
 					header/packet.h \
 					header/rc4.h
 
-all: tests
+all: sockets
 
-program:
-	$(CC) -o outputs/program.out program.c $(CFLAGS)
+sockets: alice carolwep ap carol bob
+
+alice:
+	$(CC) -o outputs/alice.out sockets/alice.c $(CFLAGS)
+
+carolwep:
+	$(CC) -o outputs/carolwep.out sockets/carolwep.c $(CFLAGS)
+
+ap:
+	$(CC) -o outputs/ap.out sockets/ap.c $(CFLAGS)
+
+carol:
+	$(CC) -o outputs/carol.out sockets/carol.c $(CFLAGS)
+
+bob:
+	$(CC) -o outputs/bob.out sockets/bob.c $(CFLAGS)
 
 tests: crc32_test packet_test rc4_test edit_test
 

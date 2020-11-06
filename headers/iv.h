@@ -10,6 +10,20 @@ typedef struct InitVector {
   char arr[3];
 }iv;
 
+/* populate_iv
+ * ==========================================================================
+ * Objective:
+ * Populate initialization vector with a random value across all 3 bytes
+ *
+ * Inputs:
+ * iv* vec      : vector to populate with rand()
+ *
+ * Outputs:
+ * None
+ *
+ * Results:
+ * vec's internal array will be filled with rand() % 256 values
+ */
 
 void populate_iv(iv* vec){
   srand(time(NULL));
