@@ -32,27 +32,36 @@ int main(){
   int out_close_status = -1;
  
 
-  // socket address info for carolwep (to receive) 
+  // socket address info for AP (to receive) 
   struct sockaddr_in my_address;
   my_address.sin_family = AF_INET;
-  my_address.sin_port = htons(49500);
+  my_address.sin_port = htons(49000);
   my_address.sin_addr.s_addr = INADDR_ANY;
 
-  struct sockaddr_in ap_address;
-  ap_address.sin_family = AF_INET;
-  ap_address.sin_port = htons(49000);
-  ap_address.sin_addr.s_addr = INADDR_ANY;
+  struct sockaddr_in bob_address;
+  bob_address.sin_family = AF_INET;
+  bob_address.sin_port = htons(48500);
+  bob_address.sin_addr.s_addr = INADDR_ANY;
+
+  struct sockaddr_in carol_address;
+  carol_address.sin_family = AF_INET;
+  carol_address.sin_port = htons(48000);
+  carol_address.sin_addr.s_addr = INADDR_ANY;
+
 
   // create sockets for listening and sending
   listen_socket = socket(AF_INET, SOCK_STREAM, 0);
   out_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 
-  // bind listen_socket to carolWEP server
+  // bind listen_socket to local AP server
   listen_bind_status = bind(listen_socket, (struct sockaddr*) &my_address, sizeof(my_address));
-  
+ 
   if(listen_bind_status < 0){
-    printf("\n Error: Failed to bind listening socket to CarolWEP server\n");
+    printf("\nError: Failed to bind listening socket to CarolWEP server\n");
+  }
+  else{
+    printf("\nSuccess: Listening socket is bound to local AP server\n");
   }
 
 
@@ -62,9 +71,12 @@ int main(){
   if(listen_status == -1){
     printf("\nError: Failed to listen for packets\n");
   }
-
-
+  else{
+    printf("\nSuccess: Successfully listening to packets\n");
+  }
  
+
+
   while(1){
    
     // accept the incoming connection ***** Check later recv fails 
@@ -74,7 +86,7 @@ int main(){
     in_read_status = read(in_socket, readBuffer, sizeof(readBuffer));
 
 
-    /* KEEP NOTE FOR MODIFICATION HERE
+    /* KEEP NOTE FOR DECRYPTION HERE
      *
      *
      *
@@ -83,12 +95,19 @@ int main(){
 
     printf("\nReceived packet: %s", readBuffer);
 
-    // CONNECT to AP
-    out_conn_status = connect(out_socket, (struct sockaddr*) &ap_address, sizeof(ap_address));
+    // Connect to the correct remote server
+    if(readBuffer[0] == 0){
+      out_conn_status = connect(out_socket, (struct sockaddr*) &carol_address, sizeof(ap_address));
+    }
+
+    else{
+      out_conn_status = connect(out_socket, (struct sockaddr*) &bob_address, sizeof(ap_address));
+    }
 
     if(out_conn_status < 0){
       printf("\nError: Failed to connect to AP from CarolWEP\n");
     }
+
 
 
     // send the packet
