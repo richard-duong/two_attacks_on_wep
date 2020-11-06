@@ -6,11 +6,11 @@
 #include "crc32.h"
 #include "rc4.h"
 
-unsigned char alice[4] =     {169, 235, 16 , 75 };       // port 50000
-unsigned char carolwep[4] =  {100, 100, 100, 100};       // port 49500
-unsigned char ap[4] =        {255, 255, 255, 255};       // port 49000
-unsigned char bob[4] =       {141, 212, 113, 199};       // port 48500
-unsigned char carol[4] =     {128, 2,   42,  95 };       // port 48000
+unsigned char alice_ip[4] =     {169, 235, 16 , 75 };       // port 50000
+unsigned char carolwep_ip[4] =  {100, 100, 100, 100};       // port 49500
+unsigned char ap_ip[4] =        {255, 255, 255, 255};       // port 49000
+unsigned char bob_ip[4] =       {141, 212, 113, 199};       // port 48500
+unsigned char carol_ip[4] =     {128, 2,   42,  95 };       // port 48000
 
 
 typedef struct packets {
@@ -25,6 +25,7 @@ typedef struct packets {
 /******* PROTOTYPES *******/
 /**************************/
 
+void hack_dest_of_packet(packet* pktptr, char* old_dest, char* new_dest);
 void populate_packet(packet* pktptr, unsigned char* src, unsigned char* dest, unsigned char* msg);
 int receive_packet(packet* pktptr, unsigned char* buffer);
 void populate_crc(packet* pktptr);
@@ -89,8 +90,6 @@ void populate_packet(packet* pktptr, unsigned char* src, unsigned char* dest, un
  * Returns a 0 if the packet was not modified
  */
 
-
-
 int receive_packet(packet* pktptr, unsigned char* buffer){
   crc32 check;
 
@@ -99,6 +98,27 @@ int receive_packet(packet* pktptr, unsigned char* buffer){
   store_crc(&check, pktptr->raw, 12);
   return crc_check(&pktptr->crc, &check);
 }
+
+
+
+void hack_dest_of_packet(packet* pktptr, char* old_dest, char* new_dest){
+  packet my_pkt;
+  packet cancel_pkt;
+  unsigned char empty_buffer[4] = {0, 0, 0, 0};
+
+  populate_packet(&my_pkt, empty_buffer, new_dest, empty_buffer);
+  populate_packet(&cancel_pkt, empty_buffer, old_dest, empty_buffer);
+  
+  for(int i = 0; i < 16; ++i){
+    pktptr->encoding[i + 3] ^= my_pkt.raw[i];
+    pktptr->encoding[i + 3] ^= cancel_pkt.raw[i];
+
+  }
+}
+
+
+
+
 
 /******* HELPER FUNCTIONS *******/
 /********************************/

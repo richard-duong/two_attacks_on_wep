@@ -23,25 +23,11 @@ int main(){
   // define packet for alice
   packet a_pkt;
   unsigned char a_msg[5] = "nope";    
-  unsigned char a_src[4] = {1, 1, 1, 1};            // alice's ip
-  unsigned char a_dest[4] = {2, 2, 2, 2};           // bob's ip
-  populate_packet(&a_pkt, a_src, a_dest, a_msg);
+  populate_packet(&a_pkt, alice_ip, bob_ip, a_msg);
   printf("\n\nThis is Alice's Packet\n");
   print_packet(&a_pkt);
 
-
-  // define packet for carol
-  // pad everything with zeroes except for destination
-  packet c_pkt;
-  unsigned char c_msg[4] = {0, 0, 0, 0};          // pad with zeroes
-  unsigned char c_src[4] = {0, 0, 0, 0};          // pad with zeroes
-  unsigned char c_dest[4] = {3, 3, 3, 3};         // carol's ip
-  populate_packet(&c_pkt, c_src, c_dest, c_msg);
-
-  for(int i = 0; i < 16; ++i){
-    a_pkt.encoding[i + 3] ^= c_pkt.raw[i];
-  }
-
+  hack_dest_of_packet(&a_pkt, bob_ip, carol_ip);
   int valid_packet = receive_packet(&a_pkt, a_pkt.encoding);
 
   printf("\n\nThis is Alice's packet after being modified by Carol (Expect 3333 for DEST)\n");
@@ -53,7 +39,5 @@ int main(){
   else{
     printf("\n\nCRC Checksum: FAILED\n");
   }
-
-
 
 }
