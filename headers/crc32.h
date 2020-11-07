@@ -85,32 +85,6 @@ __uint32_t generate_crc(const unsigned char* msg, int size){
   return crc;
 }
 
-// 2 byte example (SID) 74
-/*
-__uint32_t chop_chop(const unsigned char* msg, int size){
-
-    // 1. Calculate CRC
-    __uint32_t crc = generate_crc(msg, size);
-
-    // 2. Reverse CRC
-    crc = crc ^ 0xFFFFFFFF;
-
-    // 3. Find matching first byte with crc and table
-
-    for(int i = 0; i < 256; ++i){
-      if((crc & 0xFF000000) == (crc_tbl[i] & 0xFF000000)){
-        crc ^= crc_tbl[i];
-        crc <<= 8;
-        break;
-      }
-    }
-
-    // Return this value and guess in function
-    return crc;
-}
-*/
-
-
 
 /* store_crc
  * ==========================================================================

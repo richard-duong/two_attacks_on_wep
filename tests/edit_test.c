@@ -24,7 +24,7 @@ int main(){
   printf("\n\nPacket before being modified by Carol\n");
   print_packet(&a_pkt);
 
-  hack_dest_of_packet(&a_pkt, BOB_IP, CAROL_IP);
+  hack_dest(a_pkt.encryption, BOB_IP, CAROL_IP);
   int valid_packet = receive_packet(&a_pkt, a_pkt.encryption);
 
   printf("\n\nPacket after being modified by Carol \n");

@@ -35,7 +35,7 @@ typedef struct packets {
 /******* PROTOTYPES *******/
 /**************************/
 
-void hack_dest_of_packet(packet* pktptr, const unsigned char* old_dest, const unsigned char* new_dest);
+void hack_dest(unsigned char* buffer, const unsigned char* old_dest, const unsigned char* new_dest);
 void populate_packet(packet* pktptr, const unsigned char* src, const unsigned char* dest, const unsigned char* msg);
 int receive_packet(packet* pktptr, const unsigned char* buffer);
 void populate_crc(packet* pktptr);
@@ -114,7 +114,7 @@ int receive_packet(packet* pktptr, const unsigned char* buffer){
 
 
 
-/* hack_dest_of_packet
+/* hack_dest
  * =========================================================================
  * Objective:
  * Modify the destination of an encrypted packet that has a CRC attached
