@@ -62,13 +62,6 @@ it with her own destination. Cancelled values are prefixed with a **-** sign for
 |    ⊕   	| -00 	| -00 	| -00 	| -00 	| -11 	| -22 	| -33 	| -44 	|
 |    =   	|  AA 	|  BB 	|  CC 	|  DD 	|  FF 	|  FF 	|  FF 	|  FF 	|
 
-|        	|        	|        	|        	|        	|        	|        	|        	|        	|
-|--------	|--------	|--------	|--------	|--------	|--------	|--------	|--------	|--------	|
-| Packet 	|   AA   	|   BB   	|   CC   	|   DD   	| **11** 	| **22** 	| **33** 	| **44** 	|
-|    ⊕   | **00** 	| **00** 	| **00** 	| **00** 	|   FF   	|   FF   	|   FF   	|   FF   	|
-|    ⊕   | **00** 	| **00** 	| **00** 	| **00** 	| **11** 	| **22** 	| **33** 	| **44** 	|
-|    =   	|   AA   	|   BB   	|   CC   	|   DD   	|   FF   	|   FF   	|   FF   	|   FF   	|
-
 This demonstration is done with a plaintext, but the same idea applies even with the WEP encryption as long<br>
 as the two conditions above are met. There is another intermediate step not mentioned here, but the CRC is<br>
 calculated **for each buffer she uses**, and XOR'ed on top of the CRC that is attached to the end of the packet.<br>
