@@ -85,6 +85,7 @@ However it still demonstrates the attack on the encryption / packet validity ove
 | **Access Point** 	| 255.255.255.255 	| 49000 	|
 | **Bob**          	| 141.212.113.199 	| 48500 	|
 | **Carol**        	| 128.2.42.95     	| 48000 	|
+<br><br>
 
 -----------------------------------------------------------------------------------------------------------------------
 ## The Chop Chop Attack
