@@ -19,12 +19,12 @@ int main(){
 
   packet a_pkt;
   unsigned char a_msg[5] = "nope";    
-  populate_packet(&a_pkt, alice_ip, bob_ip, a_msg);
+  populate_packet(&a_pkt, ALICE_IP, BOB_IP, a_msg);
 
   printf("\n\nPacket before being modified by Carol\n");
   print_packet(&a_pkt);
 
-  hack_dest_of_packet(&a_pkt, bob_ip, carol_ip);
+  hack_dest_of_packet(&a_pkt, BOB_IP, CAROL_IP);
   int valid_packet = receive_packet(&a_pkt, a_pkt.encryption);
 
   printf("\n\nPacket after being modified by Carol \n");
