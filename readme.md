@@ -21,6 +21,7 @@ Let's say Alice wants to send packets to Bob. Alice will follow these steps to a
 7. Access Point calculates the CRC on the original packet and compares to the attached CRC to make sure nothing was modified
 8. Access Point sends the decrypted packet over to Bob
 9. Bob receives the packets
+<br><br>
 
 -----------------------------------------------------------------------------------------------------------------------
 ## The Packet-Redirect Attack
