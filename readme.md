@@ -35,7 +35,7 @@ Let's say Alice wants to send packets to Bob. Alice will follow these steps to a
 6. Access Point sends the decrypted packet over to Carol
 7. Carol receives the packet<br><br>
 
-#### At this point we may be asking ourselves, how does this happen?
+#### How does this happen?
 CRC has a flaw because it modifies bytes in place to calculate the CRC checksum, which can be used to Carol's advantage.<br>
 Therefore CRC has a property where CRC(A) ⊕ CRC(B) = CRC(A ⊕ B) which can be used with XOR's self-inverse property.<br>
 
@@ -85,3 +85,28 @@ However it still demonstrates the attack on the encryption / packet validity ove
 | **Access Point** 	| 255.255.255.255 	| 49000 	|
 | **Bob**          	| 141.212.113.199 	| 48500 	|
 | **Carol**        	| 128.2.42.95     	| 48000 	|
+
+-----------------------------------------------------------------------------------------------------------------------
+## The Chop Chop Attack
+
+### The Attack
+#### This attack works if Carol is able to receive a response from the Access Point about dropped packets.
+1. Carol has to have access to the message + CRC(message)<br>
+2. Carol starts by reverse engineering the CRC(message), and stepping backwards from it<br>
+3. Let message' be when Carol chops off the last byte of the message<br>
+4. From now on, we'll call Carol's updates crc<br>
+5. Carol sets crc = crc ⊕ 0xFFFFFFFF<br>
+6. Carol searches for a top byte table index match with the top byte of crc and stores that index as crc_index<br>
+7. Carol sets crc = crc ⊕ table\[crc_index\]<br>
+8. Carol shifts crc left 8 bits<br>
+9. Carol is now looking for the last byte that matches CRC(message') ⊕ 0xFFFFFFFF<br>
+10. Carol can find the last byte value from the message with: crc_index ⊕ last byte<br>
+
+#### How does this happen?
+The way CRC is calculated, is that it modifies byte by byte. As I add more bytes, the CRC expands to fit that extra byte.<br>
+So essentially each of the CRC calculations in each step before are all valid for those substrings.<br>
+So this attack works by working backwards for each CRC calculation on the substrings. When we reverse engineer the CRC<br>
+calculation, we look for the table index that was used before to calculate this current CRC. However the drawback is that<br>
+because the original CRC calculation shifts it over a byte, we essentially need to guess the last byte in the CRC substring<br>
+Luckily this is at most 256 guesses, and once we have that, we use ⊕'s commutative property and use the CRC last byte ⊕ table index<br>
+for the value of the last byte of the original message.
