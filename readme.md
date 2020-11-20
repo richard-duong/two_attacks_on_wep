@@ -1,5 +1,4 @@
 # Two Attacks On Wep
-A homework assignment for CS165 Computer Security<br>
 Written by Jacob Tan and Richard Duong<br>
 
 ### Objective:
